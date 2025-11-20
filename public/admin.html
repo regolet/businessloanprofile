@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Business Loans</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>💼 Admin Panel</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('leads')">
+                    <span class="icon">📋</span>
+                    <span>Leads</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('questions')">
+                    <span class="icon">❓</span>
+                    <span>Questions</span>
+                </a>
+                <a href="index.html" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Back to Site</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="sectionTitle">Leads Management</h1>
+                <button class="btn-primary" id="addNewBtn" onclick="showAddQuestionModal()" style="display: none;">
+                    + Add New Question
+                </button>
+            </header>
+
+            <!-- Leads Section -->
+            <section id="leadsSection" class="content-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalLeads">0</h3>
+                        <p>Total Leads</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="todayLeads">0</h3>
+                        <p>Today's Leads</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="weekLeads">0</h3>
+                        <p>This Week</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Business</th>
+                                <th>Loan Amount</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadsTableBody">
+                            <tr>
+                                <td colspan="8" class="loading">Loading leads...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Questions Section -->
+            <section id="questionsSection" class="content-section" style="display: none;">
+                <div class="questions-list" id="questionsList">
+                    <p class="loading">Loading questions...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Lead Detail Modal -->
+    <div id="leadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lead Details</h2>
+                <span class="close" onclick="closeLeadModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="leadDetailBody">
+                <!-- Lead details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Question Modal -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="questionModalTitle">Add New Question</h2>
+                <span class="close" onclick="closeQuestionModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="questionForm">
+                    <input type="hidden" id="questionId">
+
+                    <div class="form-group">
+                        <label>Question Text *</label>
+                        <textarea id="questionText" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Question Type *</label>
+                        <select id="questionType" onchange="toggleOptions()" required>
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="text">Text Input</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Order Index</label>
+                        <input type="number" id="orderIndex" value="0">
+                    </div>
+
+                    <div class="form-group" id="optionsGroup">
+                        <label>Options (one per line)</label>
+                        <textarea id="questionOptions" rows="5"
+                            placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="closeQuestionModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

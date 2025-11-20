@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Loans - Fast & Simple Funding Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="#2563eb"/>
+                    <path d="M8 12h16M8 16h16M8 20h10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h2>BusinessLoans</h2>
+            </div>
+            <a href="#apply" class="mobile-cta">Get Started →</a>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="#home">Home</a>
+                <a href="#loan-types">Loan Types</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#faq">FAQ</a>
+                <a href="#apply" class="nav-cta">Get Started →</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Funding to Fuel Your Business</h1>
+                <p class="hero-subtitle">Compare multiple loan options at once and select the best fit with confidence. You're in the driver's seat.</p>
+                <div class="hero-features">
+                    <div class="feature">
+                        <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span>Under 3 minutes</span>
+                    </div>
+                    <div class="feature">
+                        <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>No credit impact</span>
+                    </div>
+                    <div class="feature">
+                        <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                        <span>Funding in 24 hours</span>
+                    </div>
+                </div>
+                <button class="cta-button" onclick="scrollToApply()">Get Started →</button>
+                <p class="hero-note">Answer some basic questions with no impact to your credit score</p>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&auto=format&fit=crop" alt="Business Professional">
+            </div>
+        </div>
+    </section>
+
+    <!-- Media Trust Section -->
+    <section class="media-trust">
+        <div class="container">
+            <p class="trust-text">As Featured In</p>
+            <div class="media-logos">
+                <img src="images/wsj-black.svg" alt="Wall Street Journal" class="media-logo-img">
+                <img src="images/cnbc-black.svg" alt="CNBC" class="media-logo-img">
+                <img src="images/forbes-black.svg" alt="Forbes" class="media-logo-img">
+                <img src="images/cnn-black.svg" alt="CNN" class="media-logo-img">
+                <img src="images/fox-business-black.svg" alt="Fox Business" class="media-logo-img">
+                <img src="images/entrepreneur-black.svg" alt="Entrepreneur" class="media-logo-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- Loan Types Section -->
+    <section id="loan-types" class="loan-types">
+        <div class="container">
+            <h2 class="section-title">Explore Your Loan Options</h2>
+            <p class="section-subtitle">Understanding which type of financing best suits your business needs</p>
+
+            <div class="loan-grid">
+                <div class="loan-card">
+                    <div class="loan-card-header">
+                        <div class="loan-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <h3>Short Term Loan</h3>
+                    </div>
+                    <p>Quick access to capital typically repaid within 1-2 years</p>
+                    <ul>
+                        <li>Working capital needs</li>
+                        <li>Inventory purchases</li>
+                        <li>Equipment & marketing</li>
+                        <li>Fast approval process</li>
+                    </ul>
+                </div>
+
+                <div class="loan-card featured">
+                    <div class="badge">Most Popular</div>
+                    <div class="loan-card-header">
+                        <div class="loan-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        <h3>Long Term Loan</h3>
+                    </div>
+                    <p>5-10 year terms (potentially 20+) for substantial investments</p>
+                    <ul>
+                        <li>Fixed or floating rates</li>
+                        <li>Major expansions</li>
+                        <li>Real estate purchases</li>
+                        <li>May require collateral</li>
+                    </ul>
+                </div>
+
+                <div class="loan-card">
+                    <div class="loan-card-header">
+                        <div class="loan-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                        </div>
+                        <h3>Line of Credit</h3>
+                    </div>
+                    <p>Revolving access to capital - use what you need, when you need it</p>
+                    <ul>
+                        <li>Pay interest only on used amounts</li>
+                        <li>Flexible draw schedule</li>
+                        <li>Ideal for cash flow gaps</li>
+                        <li>Reusable credit line</li>
+                    </ul>
+                </div>
+
+                <div class="loan-card">
+                    <div class="loan-card-header">
+                        <div class="loan-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                        </div>
+                        <h3>Merchant Cash Advance</h3>
+                    </div>
+                    <p>Non-loan alternative based on future receivables</p>
+                    <ul>
+                        <li>No set term or stated interest</li>
+                        <li>Repayment from daily sales</li>
+                        <li>Quick funding decision</li>
+                        <li>No fixed monthly payments</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Compare Multiple Offers in Minutes</h2>
+            <p class="section-subtitle">Our proprietary technology matches you with handpicked lenders from our network</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&auto=format&fit=crop" alt="Mobile Application">
+                    <h3>Answer Basic Questions</h3>
+                    <p>Complete our simple form in under 3 minutes. No impact to your credit score during the initial review.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&auto=format&fit=crop" alt="Compare Offers">
+                    <h3>Compare Your Options</h3>
+                    <p>Review multiple loan offers side-by-side. Our technology finds the best matches for your specific needs.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&auto=format&fit=crop" alt="Get Funded">
+                    <h3>Choose & Get Funded</h3>
+                    <p>Select the best offer for your business. Receive funding as fast as 24 hours.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+
+            <div class="faq-grid">
+                <div class="faq-item active">
+                    <div class="faq-question">
+                        <h3>How long does the application take?</h3>
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Our streamlined application takes less than 3 minutes to complete. You'll answer some basic questions about your business and funding needs.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Will checking rates affect my credit score?</h3>
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>No. The initial review and offer comparison process does not impact your credit score. Only when you proceed with a specific lender might a hard credit check be required.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How quickly can I get funded?</h3>
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Funding speed varies by lender and loan type. Many of our partners offer funding within 24 hours of approval, though some products may take longer.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What do I need to qualify?</h3>
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Requirements vary by loan type and lender. Generally, you'll need to be in business for a minimum period and meet certain revenue thresholds. Our network includes options for various credit profiles.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Application Form / Questionnaire -->
+    <section id="apply" class="apply-section">
+        <div class="container">
+            <h2 class="section-title">Start Your Application</h2>
+            <p class="section-subtitle">Answer a few quick questions in under 3 minutes. No impact to your credit score.</p>
+
+            <div class="application-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div id="questionnaireContainer" class="questionnaire">
+                    <!-- Questions will be loaded here dynamically -->
+                </div>
+
+                <div id="contactFormContainer" class="contact-form" style="display: none;">
+                    <h3>Almost Done! Tell Us How to Reach You</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" name="phone" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Business Name *</label>
+                            <input type="text" name="business_name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Desired Loan Amount</label>
+                            <input type="text" name="loan_amount" placeholder="e.g., $50,000">
+                        </div>
+
+                        <button type="submit" class="cta-button">Submit Application</button>
+                    </form>
+                </div>
+
+                <div id="thankYouMessage" class="thank-you" style="display: none;">
+                    <div class="success-icon">✓</div>
+                    <h2>Thank You!</h2>
+                    <p>Your application has been submitted successfully. We'll review your information and contact you within 24 hours with loan options.</p>
+                    <button class="cta-button" onclick="location.reload()">Submit Another Application</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>💼 BusinessLoans</h3>
+                    <p>Empowering businesses with fast, flexible financing solutions.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="#home">Home</a>
+                    <a href="#loan-types">Loan Types</a>
+                    <a href="#apply">Apply Now</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@businessloans.com</p>
+                    <p>Phone: 1-800-BUSINESS</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 BusinessLoans. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="animations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
