@@ -50,6 +50,47 @@ npm start
 - **Public Site**: http://localhost:3000
 - **Admin Panel**: http://localhost:3000/admin.html
 
+## Deployment to Vercel
+
+### Quick Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/regolet/businessloanprofile)
+
+### Manual Deployment
+
+1. Install Vercel CLI:
+```bash
+npm i -g vercel
+```
+
+2. Login to Vercel:
+```bash
+vercel login
+```
+
+3. Deploy:
+```bash
+vercel
+```
+
+4. For production deployment:
+```bash
+vercel --prod
+```
+
+### Important Notes for Vercel
+
+⚠️ **Database Limitation**: Vercel serverless functions are stateless, so SQLite will reset between deployments. For production, you should:
+
+- Use a cloud database like:
+  - **PostgreSQL** (Vercel Postgres, Supabase, Neon)
+  - **MongoDB** (MongoDB Atlas)
+  - **PlanetScale** (MySQL)
+
+- Or use Vercel KV/Storage for persistent data
+
+The current SQLite setup works for development but data will not persist in production on Vercel.
+
 ## Usage
 
 ### For Visitors

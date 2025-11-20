@@ -5,7 +5,11 @@
       "Bash(npm start)",
       "Bash(dir:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: Business loan profile funnel website\n\nFeatures:\n- Modern responsive landing page with hero section\n- Loan types showcase (Short Term, Long Term, Line of Credit, Merchant Cash Advance)\n- Dynamic questionnaire system with SQLite backend\n- Admin panel for question management\n- Professional design with Inter font family\n- Smooth scroll animations and parallax effects\n- Collapsible FAQ section\n- Mobile-responsive navigation with burger menu\n- Media trust logos (WSJ, CNN, Forbes, CNBC, Fox Business, Entrepreneur)\n- Compact loan cards with side-by-side icon+title layout\n- Full mobile optimization with centered hero and compact cards\n\nTech Stack:\n- Frontend: HTML5, CSS3, Vanilla JavaScript\n- Backend: Node.js, Express.js\n- Database: SQLite3\n- Email: Nodemailer (optional)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

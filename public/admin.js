@@ -1,4 +1,7 @@
-const API_URL = 'http://localhost:3000/api';
+// Use relative URL for API calls (works in both dev and production)
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000/api'
+    : '/api';
 
 let leads = [];
 let questions = [];
