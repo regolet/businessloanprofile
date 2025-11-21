@@ -740,9 +740,12 @@ body {
 
 .faq-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
     margin-top: 3rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .faq-item {
@@ -1057,11 +1060,6 @@ body {
     .steps {
         grid-template-columns: 1fr;
         gap: 2rem;
-    }
-
-    .faq-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
     }
 
     .faq-item {
