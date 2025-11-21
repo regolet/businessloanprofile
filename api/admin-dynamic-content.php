@@ -300,11 +300,12 @@ function createHowItWorksStep($conn) {
         return;
     }
 
-    $stmt = $conn->prepare("INSERT INTO how_it_works_steps (step_number, title, description, order_index) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO how_it_works_steps (step_number, title, description, image_url, order_index) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([
         $input['step_number'] ?? 1,
         $input['title'],
         $input['description'] ?? '',
+        $input['image_url'] ?? null,
         $input['order_index'] ?? 0
     ]);
 
@@ -323,11 +324,12 @@ function updateHowItWorksStep($conn, $id) {
     }
 
     $input = getJsonInput();
-    $stmt = $conn->prepare("UPDATE how_it_works_steps SET step_number = ?, title = ?, description = ?, order_index = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE how_it_works_steps SET step_number = ?, title = ?, description = ?, image_url = ?, order_index = ? WHERE id = ?");
     $stmt->execute([
         $input['step_number'] ?? 1,
         $input['title'],
         $input['description'] ?? '',
+        $input['image_url'] ?? null,
         $input['order_index'] ?? 0,
         $id
     ]);

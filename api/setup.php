@@ -107,10 +107,18 @@ try {
             step_number INT NOT NULL,
             title VARCHAR(255) NOT NULL,
             description TEXT,
+            image_url VARCHAR(500),
             order_index INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+
+    // Add image_url column if it doesn't exist (migration)
+    try {
+        $conn->exec("ALTER TABLE how_it_works_steps ADD COLUMN image_url VARCHAR(500) AFTER description");
+    } catch (PDOException $e) {
+        // Column already exists, ignore error
+    }
 
     // Create faqs table (dynamic)
     $conn->exec("

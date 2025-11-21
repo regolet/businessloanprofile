@@ -1409,7 +1409,7 @@ function displayHowItWorksSteps() {
         stepDiv.className = 'dynamic-item';
         stepDiv.innerHTML = `
             <div class="dynamic-item-header">
-                <h4>Step ${step.step_number}: ${step.title}</h4>
+                <h4>Step ${step.step_number}: ${escapeHtml(step.title)}</h4>
                 <div class="dynamic-item-actions">
                     <button type="button" class="btn-icon" onclick="editHowItWorksStep(${step.id})" title="Edit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1431,11 +1431,15 @@ function displayHowItWorksSteps() {
             </div>
             <div class="form-group">
                 <label>Title</label>
-                <input type="text" value="${step.title}" disabled>
+                <input type="text" value="${escapeHtml(step.title)}" disabled>
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <textarea rows="2" disabled>${step.description || ''}</textarea>
+                <textarea rows="2" disabled>${escapeHtml(step.description || '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Image URL</label>
+                <input type="url" value="${escapeHtml(step.image_url || '')}" disabled>
             </div>
         `;
         container.appendChild(stepDiv);
@@ -1450,11 +1454,13 @@ function addHowItWorksStep() {
     if (!title) return;
 
     const description = prompt('Enter description:');
+    const imageUrl = prompt('Enter image URL (e.g., from Unsplash, Pexels, or your own hosting):');
 
     saveHowItWorksStep({
         step_number: parseInt(stepNumber),
         title,
         description,
+        image_url: imageUrl,
         order_index: howItWorksSteps.length + 1
     });
 }
@@ -1472,10 +1478,14 @@ function editHowItWorksStep(id) {
     const description = prompt('Edit description:', step.description);
     if (description === null) return;
 
+    const imageUrl = prompt('Edit image URL:', step.image_url || '');
+    if (imageUrl === null) return;
+
     updateHowItWorksStep(id, {
         step_number: parseInt(stepNumber),
         title,
         description,
+        image_url: imageUrl,
         order_index: step.order_index
     });
 }
