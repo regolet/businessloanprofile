@@ -57,6 +57,19 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 
+    // Create site_settings table
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS site_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            category VARCHAR(50) NOT NULL,
+            setting_key VARCHAR(100) NOT NULL,
+            setting_value TEXT,
+            setting_type VARCHAR(20) DEFAULT 'text',
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_setting (category, setting_key)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
     // Check if default questions exist
     $stmt = $conn->query("SELECT COUNT(*) as count FROM questions");
     $row = $stmt->fetch();
@@ -133,9 +146,67 @@ try {
             }
         }
 
+        $settingsInserted = true;
+    } else {
+        $settingsInserted = false;
+    }
+
+    // Check if default settings exist
+    $stmt = $conn->query("SELECT COUNT(*) as count FROM site_settings");
+    $row = $stmt->fetch();
+
+    if ($row['count'] == 0) {
+        // Insert default settings
+        $defaultSettings = [
+            // Company Profile
+            ['company', 'name', 'BusinessLoansProfile', 'text'],
+            ['company', 'email', 'info@businessloans.com', 'email'],
+            ['company', 'phone', '1-800-BUSINESS', 'text'],
+            ['company', 'address', '', 'textarea'],
+
+            // Hero Section
+            ['hero', 'title', 'Funding to Fuel Your Business', 'text'],
+            ['hero', 'subtitle', 'Compare multiple loan options at once and select the best fit with confidence. You\'re in the driver\'s seat.', 'textarea'],
+            ['hero', 'cta_text', 'Get Started', 'text'],
+            ['hero', 'note', 'Answer some basic questions with no impact to your credit score', 'text'],
+
+            // Hero Features
+            ['hero_features', 'feature1_text', 'Under 3 minutes', 'text'],
+            ['hero_features', 'feature2_text', 'No credit impact', 'text'],
+            ['hero_features', 'feature3_text', 'Funding in 24 hours', 'text'],
+
+            // Loan Types Section
+            ['loan_types', 'section_title', 'Explore Your Loan Options', 'text'],
+            ['loan_types', 'section_subtitle', 'Understanding which type of financing best suits your business needs', 'text'],
+
+            // How It Works
+            ['how_it_works', 'section_title', 'Compare Multiple Offers in Minutes', 'text'],
+            ['how_it_works', 'section_subtitle', 'Our proprietary technology matches you with handpicked lenders from our network', 'text'],
+
+            // FAQ Items (default 4 FAQs)
+            ['faq', 'faq1_question', 'How long does the application take?', 'text'],
+            ['faq', 'faq1_answer', 'Our streamlined application takes less than 3 minutes to complete. You\'ll answer some basic questions about your business and funding needs.', 'textarea'],
+            ['faq', 'faq2_question', 'Will checking rates affect my credit score?', 'text'],
+            ['faq', 'faq2_answer', 'No. The initial review and offer comparison process does not impact your credit score. Only when you proceed with a specific lender might a hard credit check be required.', 'textarea'],
+            ['faq', 'faq3_question', 'How quickly can I get funded?', 'text'],
+            ['faq', 'faq3_answer', 'Funding speed varies by lender and loan type. Many of our partners offer funding within 24 hours of approval, though some products may take longer.', 'textarea'],
+            ['faq', 'faq4_question', 'What do I need to qualify?', 'text'],
+            ['faq', 'faq4_answer', 'Requirements vary by loan type and lender. Generally, you\'ll need to be in business for a minimum period and meet certain revenue thresholds. Our network includes options for various credit profiles.', 'textarea'],
+        ];
+
+        $settingStmt = $conn->prepare("INSERT INTO site_settings (category, setting_key, setting_value, setting_type) VALUES (?, ?, ?, ?)");
+
+        foreach ($defaultSettings as $setting) {
+            $settingStmt->execute($setting);
+        }
+
+        $settingsInserted = true;
+    }
+
+    if ($settingsInserted) {
         echo json_encode([
             'success' => true,
-            'message' => 'Database tables created and default questions inserted successfully!'
+            'message' => 'Database tables created and default data inserted successfully!'
         ]);
     } else {
         echo json_encode([

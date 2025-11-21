@@ -36,7 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadLeads();
     loadQuestions();
+    loadSettings();
     setupQuestionForm();
+    setupSettingsForm();
 });
 
 // Show section
@@ -51,13 +53,21 @@ function showSection(section) {
     if (section === 'leads') {
         document.getElementById('leadsSection').style.display = 'block';
         document.getElementById('questionsSection').style.display = 'none';
+        document.getElementById('settingsSection').style.display = 'none';
         document.getElementById('sectionTitle').textContent = 'Leads Management';
         document.getElementById('addNewBtn').style.display = 'none';
     } else if (section === 'questions') {
         document.getElementById('leadsSection').style.display = 'none';
         document.getElementById('questionsSection').style.display = 'block';
+        document.getElementById('settingsSection').style.display = 'none';
         document.getElementById('sectionTitle').textContent = 'Questions Management';
         document.getElementById('addNewBtn').style.display = 'block';
+    } else if (section === 'settings') {
+        document.getElementById('leadsSection').style.display = 'none';
+        document.getElementById('questionsSection').style.display = 'none';
+        document.getElementById('settingsSection').style.display = 'block';
+        document.getElementById('sectionTitle').textContent = 'Site Settings';
+        document.getElementById('addNewBtn').style.display = 'none';
     }
 }
 
@@ -743,4 +753,123 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.toString().replace(/[&<>"']/g, m => map[m]);
+}
+
+// Settings Management
+
+let siteSettings = {};
+
+// Load settings
+async function loadSettings() {
+    try {
+        const response = await fetch(`${API_URL}/admin-settings.php`, {
+            headers: getAuthHeaders()
+        });
+        siteSettings = await response.json();
+        
+        displaySettings();
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+}
+
+// Display settings in form
+function displaySettings() {
+    // Company settings
+    if (siteSettings.company) {
+        document.getElementById('company_name').value = siteSettings.company.name?.value || '';
+        document.getElementById('company_email').value = siteSettings.company.email?.value || '';
+        document.getElementById('company_phone').value = siteSettings.company.phone?.value || '';
+        document.getElementById('company_address').value = siteSettings.company.address?.value || '';
+    }
+
+    // Hero section
+    if (siteSettings.hero) {
+        document.getElementById('hero_title').value = siteSettings.hero.title?.value || '';
+        document.getElementById('hero_subtitle').value = siteSettings.hero.subtitle?.value || '';
+        document.getElementById('hero_cta_text').value = siteSettings.hero.cta_text?.value || '';
+        document.getElementById('hero_note').value = siteSettings.hero.note?.value || '';
+    }
+
+    // Hero features
+    if (siteSettings.hero_features) {
+        document.getElementById('hero_features_feature1_text').value = siteSettings.hero_features.feature1_text?.value || '';
+        document.getElementById('hero_features_feature2_text').value = siteSettings.hero_features.feature2_text?.value || '';
+        document.getElementById('hero_features_feature3_text').value = siteSettings.hero_features.feature3_text?.value || '';
+    }
+
+    // Loan types
+    if (siteSettings.loan_types) {
+        document.getElementById('loan_types_section_title').value = siteSettings.loan_types.section_title?.value || '';
+        document.getElementById('loan_types_section_subtitle').value = siteSettings.loan_types.section_subtitle?.value || '';
+    }
+
+    // How it works
+    if (siteSettings.how_it_works) {
+        document.getElementById('how_it_works_section_title').value = siteSettings.how_it_works.section_title?.value || '';
+        document.getElementById('how_it_works_section_subtitle').value = siteSettings.how_it_works.section_subtitle?.value || '';
+    }
+
+    // FAQ
+    if (siteSettings.faq) {
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`faq_faq${i}_question`).value = siteSettings.faq[`faq${i}_question`]?.value || '';
+            document.getElementById(`faq_faq${i}_answer`).value = siteSettings.faq[`faq${i}_answer`]?.value || '';
+        }
+    }
+}
+
+// Setup settings form submission
+function setupSettingsForm() {
+    const form = document.getElementById('settingsForm');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const settings = {
+            company: {},
+            hero: {},
+            hero_features: {},
+            loan_types: {},
+            how_it_works: {},
+            faq: {}
+        };
+
+        // Organize form data by category
+        for (let [name, value] of formData.entries()) {
+            const parts = name.split('_');
+            const category = parts[0];
+            
+            if (category === 'hero' && parts[1] === 'features') {
+                settings.hero_features[parts.slice(2).join('_')] = value;
+            } else if (category === 'loan' && parts[1] === 'types') {
+                settings.loan_types[parts.slice(2).join('_')] = value;
+            } else if (category === 'how') {
+                settings.how_it_works[parts.slice(3).join('_')] = value;
+            } else {
+                settings[category][parts.slice(1).join('_')] = value;
+            }
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/admin-settings.php`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ settings })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Settings saved successfully!');
+                loadSettings();
+            } else {
+                alert('Error saving settings: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            alert('Error saving settings. Please try again.');
+        }
+    });
 }
