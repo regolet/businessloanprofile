@@ -18,7 +18,8 @@
       "Bash(move logo_.png publicimageslogo.png)",
       "Bash(move:*)",
       "Bash(mv:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(del nul)"
     ],
     "deny": [],
     "ask": []
