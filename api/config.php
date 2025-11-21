@@ -3,9 +3,9 @@
 // IMPORTANT: Update these values with your cPanel MySQL database credentials
 
 define('DB_HOST', 'localhost');  // Usually 'localhost' in cPanel
-define('DB_NAME', 'your_database_name');  // Your MySQL database name from cPanel
-define('DB_USER', 'your_username');  // Your MySQL username from cPanel
-define('DB_PASS', 'your_password');  // Your MySQL password from cPanel
+define('DB_NAME', 'busiqsia_businessloanprofiledb');  // Your MySQL database name from cPanel
+define('DB_USER', 'busiqsia_admin');  // Your MySQL username from cPanel
+define('DB_PASS', 'Businessloan$');  // Your MySQL password from cPanel
 
 // Admin credentials (change these!)
 define('ADMIN_USERNAME', 'admin');
