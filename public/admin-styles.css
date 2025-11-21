@@ -214,6 +214,7 @@ body {
 /* Questions List */
 .questions-list {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
 }
 
@@ -432,6 +433,10 @@ body {
         flex-direction: column;
         gap: 1rem;
         align-items: flex-start;
+    }
+
+    .questions-list {
+        grid-template-columns: 1fr;
     }
 
     .modal-content {
