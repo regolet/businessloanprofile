@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLeads();
     loadQuestions();
     loadSettings();
+    loadDynamicContent();
     setupQuestionForm();
     setupSettingsForm();
 });
@@ -872,4 +873,624 @@ function setupSettingsForm() {
             alert('Error saving settings. Please try again.');
         }
     });
+}
+
+// ============= SETTINGS TAB SWITCHING =============
+let currentSettingsTab = 'company';
+
+function switchSettingsTab(tabName) {
+    currentSettingsTab = tabName;
+
+    // Update tab buttons
+    document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Update tab content
+    document.querySelectorAll('.settings-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    const tabContentMap = {
+        'company': 'companyTab',
+        'hero': 'heroTab',
+        'features': 'featuresTab',
+        'loantypes': 'loantypesTab',
+        'howitworks': 'howitworksTab',
+        'faq': 'faqTab'
+    };
+
+    document.getElementById(tabContentMap[tabName])?.classList.add('active');
+}
+
+// ============= DYNAMIC CONTENT MANAGEMENT =============
+let heroFeatures = [];
+let loanTypes = [];
+let howItWorksSteps = [];
+let faqs = [];
+
+async function loadDynamicContent() {
+    await loadHeroFeatures();
+    await loadLoanTypes();
+    await loadHowItWorksSteps();
+    await loadFAQs();
+}
+
+// ============= HERO FEATURES =============
+async function loadHeroFeatures() {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features`, {
+            headers: getAuthHeaders()
+        });
+        heroFeatures = await response.json();
+        displayHeroFeatures();
+    } catch (error) {
+        console.error('Error loading hero features:', error);
+    }
+}
+
+function displayHeroFeatures() {
+    const container = document.getElementById('heroFeaturesList');
+    if (!container) return;
+
+    container.innerHTML = heroFeatures.length === 0
+        ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No features added yet. Click "Add Feature" to get started.</p>'
+        : '';
+
+    heroFeatures.forEach((feature, index) => {
+        const featureDiv = document.createElement('div');
+        featureDiv.className = 'dynamic-item';
+        featureDiv.innerHTML = `
+            <div class="dynamic-item-header">
+                <h4>Feature ${index + 1}</h4>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="btn-icon" onclick="editHeroFeature(${feature.id})" title="Edit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-icon danger" onclick="deleteHeroFeature(${feature.id})" title="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Feature Text</label>
+                <input type="text" value="${feature.feature_text}" id="feature_${feature.id}" disabled>
+            </div>
+        `;
+        container.appendChild(featureDiv);
+    });
+}
+
+function addHeroFeature() {
+    const text = prompt('Enter feature text:');
+    if (!text) return;
+
+    saveHeroFeature({ feature_text: text, order_index: heroFeatures.length + 1 });
+}
+
+function editHeroFeature(id) {
+    const feature = heroFeatures.find(f => f.id === id);
+    if (!feature) return;
+
+    const newText = prompt('Edit feature text:', feature.feature_text);
+    if (newText === null) return;
+
+    updateHeroFeature(id, { feature_text: newText, order_index: feature.order_index });
+}
+
+async function saveHeroFeature(data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadHeroFeatures();
+        } else {
+            alert('Error saving feature');
+        }
+    } catch (error) {
+        console.error('Error saving feature:', error);
+        alert('Error saving feature');
+    }
+}
+
+async function updateHeroFeature(id, data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features&id=${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadHeroFeatures();
+        } else {
+            alert('Error updating feature');
+        }
+    } catch (error) {
+        console.error('Error updating feature:', error);
+        alert('Error updating feature');
+    }
+}
+
+async function deleteHeroFeature(id) {
+    if (!confirm('Are you sure you want to delete this feature?')) return;
+
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features&id=${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        if (response.ok) {
+            await loadHeroFeatures();
+        } else {
+            alert('Error deleting feature');
+        }
+    } catch (error) {
+        console.error('Error deleting feature:', error);
+        alert('Error deleting feature');
+    }
+}
+
+// ============= LOAN TYPES =============
+async function loadLoanTypes() {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types`, {
+            headers: getAuthHeaders()
+        });
+        loanTypes = await response.json();
+        displayLoanTypes();
+    } catch (error) {
+        console.error('Error loading loan types:', error);
+    }
+}
+
+function displayLoanTypes() {
+    const container = document.getElementById('loanTypesList');
+    if (!container) return;
+
+    container.innerHTML = loanTypes.length === 0
+        ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No loan types added yet. Click "Add Loan Type" to get started.</p>'
+        : '';
+
+    loanTypes.forEach((type, index) => {
+        const typeDiv = document.createElement('div');
+        typeDiv.className = 'dynamic-item';
+        typeDiv.innerHTML = `
+            <div class="dynamic-item-header">
+                <h4>${type.title}</h4>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="btn-icon" onclick="editLoanType(${type.id})" title="Edit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-icon danger" onclick="deleteLoanType(${type.id})" title="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" value="${type.title}" disabled>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea rows="2" disabled>${type.description || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Icon Name</label>
+                <input type="text" value="${type.icon_name || ''}" disabled>
+            </div>
+        `;
+        container.appendChild(typeDiv);
+    });
+}
+
+function addLoanType() {
+    const title = prompt('Enter loan type title:');
+    if (!title) return;
+
+    const description = prompt('Enter description:');
+    const iconName = prompt('Enter icon name (optional):') || 'file-text';
+
+    saveLoanType({
+        title,
+        description,
+        icon_name: iconName,
+        order_index: loanTypes.length + 1
+    });
+}
+
+function editLoanType(id) {
+    const type = loanTypes.find(t => t.id === id);
+    if (!type) return;
+
+    const title = prompt('Edit loan type title:', type.title);
+    if (title === null) return;
+
+    const description = prompt('Edit description:', type.description);
+    if (description === null) return;
+
+    const iconName = prompt('Edit icon name:', type.icon_name);
+    if (iconName === null) return;
+
+    updateLoanType(id, {
+        title,
+        description,
+        icon_name: iconName,
+        order_index: type.order_index
+    });
+}
+
+async function saveLoanType(data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadLoanTypes();
+        } else {
+            alert('Error saving loan type');
+        }
+    } catch (error) {
+        console.error('Error saving loan type:', error);
+        alert('Error saving loan type');
+    }
+}
+
+async function updateLoanType(id, data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types&id=${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadLoanTypes();
+        } else {
+            alert('Error updating loan type');
+        }
+    } catch (error) {
+        console.error('Error updating loan type:', error);
+        alert('Error updating loan type');
+    }
+}
+
+async function deleteLoanType(id) {
+    if (!confirm('Are you sure you want to delete this loan type?')) return;
+
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types&id=${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        if (response.ok) {
+            await loadLoanTypes();
+        } else {
+            alert('Error deleting loan type');
+        }
+    } catch (error) {
+        console.error('Error deleting loan type:', error);
+        alert('Error deleting loan type');
+    }
+}
+
+// ============= HOW IT WORKS STEPS =============
+async function loadHowItWorksSteps() {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works`, {
+            headers: getAuthHeaders()
+        });
+        howItWorksSteps = await response.json();
+        displayHowItWorksSteps();
+    } catch (error) {
+        console.error('Error loading how it works steps:', error);
+    }
+}
+
+function displayHowItWorksSteps() {
+    const container = document.getElementById('howItWorksStepsList');
+    if (!container) return;
+
+    container.innerHTML = howItWorksSteps.length === 0
+        ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No steps added yet. Click "Add Step" to get started.</p>'
+        : '';
+
+    howItWorksSteps.forEach((step, index) => {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = 'dynamic-item';
+        stepDiv.innerHTML = `
+            <div class="dynamic-item-header">
+                <h4>Step ${step.step_number}: ${step.title}</h4>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="btn-icon" onclick="editHowItWorksStep(${step.id})" title="Edit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-icon danger" onclick="deleteHowItWorksStep(${step.id})" title="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Step Number</label>
+                <input type="number" value="${step.step_number}" disabled>
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" value="${step.title}" disabled>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea rows="2" disabled>${step.description || ''}</textarea>
+            </div>
+        `;
+        container.appendChild(stepDiv);
+    });
+}
+
+function addHowItWorksStep() {
+    const stepNumber = prompt('Enter step number:', howItWorksSteps.length + 1);
+    if (!stepNumber) return;
+
+    const title = prompt('Enter step title:');
+    if (!title) return;
+
+    const description = prompt('Enter description:');
+
+    saveHowItWorksStep({
+        step_number: parseInt(stepNumber),
+        title,
+        description,
+        order_index: howItWorksSteps.length + 1
+    });
+}
+
+function editHowItWorksStep(id) {
+    const step = howItWorksSteps.find(s => s.id === id);
+    if (!step) return;
+
+    const stepNumber = prompt('Edit step number:', step.step_number);
+    if (stepNumber === null) return;
+
+    const title = prompt('Edit title:', step.title);
+    if (title === null) return;
+
+    const description = prompt('Edit description:', step.description);
+    if (description === null) return;
+
+    updateHowItWorksStep(id, {
+        step_number: parseInt(stepNumber),
+        title,
+        description,
+        order_index: step.order_index
+    });
+}
+
+async function saveHowItWorksStep(data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadHowItWorksSteps();
+        } else {
+            alert('Error saving step');
+        }
+    } catch (error) {
+        console.error('Error saving step:', error);
+        alert('Error saving step');
+    }
+}
+
+async function updateHowItWorksStep(id, data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works&id=${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadHowItWorksSteps();
+        } else {
+            alert('Error updating step');
+        }
+    } catch (error) {
+        console.error('Error updating step:', error);
+        alert('Error updating step');
+    }
+}
+
+async function deleteHowItWorksStep(id) {
+    if (!confirm('Are you sure you want to delete this step?')) return;
+
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works&id=${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        if (response.ok) {
+            await loadHowItWorksSteps();
+        } else {
+            alert('Error deleting step');
+        }
+    } catch (error) {
+        console.error('Error deleting step:', error);
+        alert('Error deleting step');
+    }
+}
+
+// ============= FAQs =============
+async function loadFAQs() {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs`, {
+            headers: getAuthHeaders()
+        });
+        faqs = await response.json();
+        displayFAQs();
+    } catch (error) {
+        console.error('Error loading FAQs:', error);
+    }
+}
+
+function displayFAQs() {
+    const container = document.getElementById('faqList');
+    if (!container) return;
+
+    container.innerHTML = faqs.length === 0
+        ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No FAQs added yet. Click "Add FAQ" to get started.</p>'
+        : '';
+
+    faqs.forEach((faq, index) => {
+        const faqDiv = document.createElement('div');
+        faqDiv.className = 'dynamic-item';
+        faqDiv.innerHTML = `
+            <div class="dynamic-item-header">
+                <h4>FAQ ${index + 1}</h4>
+                <div class="dynamic-item-actions">
+                    <button type="button" class="btn-icon" onclick="editFAQ(${faq.id})" title="Edit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-icon danger" onclick="deleteFAQ(${faq.id})" title="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Question</label>
+                <input type="text" value="${faq.question}" disabled>
+            </div>
+            <div class="form-group">
+                <label>Answer</label>
+                <textarea rows="3" disabled>${faq.answer}</textarea>
+            </div>
+        `;
+        container.appendChild(faqDiv);
+    });
+}
+
+function addFAQ() {
+    const question = prompt('Enter FAQ question:');
+    if (!question) return;
+
+    const answer = prompt('Enter FAQ answer:');
+    if (!answer) return;
+
+    saveFAQ({
+        question,
+        answer,
+        order_index: faqs.length + 1
+    });
+}
+
+function editFAQ(id) {
+    const faq = faqs.find(f => f.id === id);
+    if (!faq) return;
+
+    const question = prompt('Edit question:', faq.question);
+    if (question === null) return;
+
+    const answer = prompt('Edit answer:', faq.answer);
+    if (answer === null) return;
+
+    updateFAQ(id, {
+        question,
+        answer,
+        order_index: faq.order_index
+    });
+}
+
+async function saveFAQ(data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadFAQs();
+        } else {
+            alert('Error saving FAQ');
+        }
+    } catch (error) {
+        console.error('Error saving FAQ:', error);
+        alert('Error saving FAQ');
+    }
+}
+
+async function updateFAQ(id, data) {
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs&id=${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            await loadFAQs();
+        } else {
+            alert('Error updating FAQ');
+        }
+    } catch (error) {
+        console.error('Error updating FAQ:', error);
+        alert('Error updating FAQ');
+    }
+}
+
+async function deleteFAQ(id) {
+    if (!confirm('Are you sure you want to delete this FAQ?')) return;
+
+    try {
+        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs&id=${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        if (response.ok) {
+            await loadFAQs();
+        } else {
+            alert('Error deleting FAQ');
+        }
+    } catch (error) {
+        console.error('Error deleting FAQ:', error);
+        alert('Error deleting FAQ');
+    }
 }

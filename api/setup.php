@@ -70,6 +70,51 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 
+    // Create hero_features table (dynamic)
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS hero_features (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            feature_text VARCHAR(255) NOT NULL,
+            order_index INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    // Create loan_types table (dynamic)
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS loan_types (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            icon_name VARCHAR(50),
+            order_index INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    // Create how_it_works_steps table (dynamic)
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS how_it_works_steps (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            step_number INT NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            order_index INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    // Create faqs table (dynamic)
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS faqs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            question TEXT NOT NULL,
+            answer TEXT NOT NULL,
+            order_index INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
     // Check if default questions exist
     $stmt = $conn->query("SELECT COUNT(*) as count FROM questions");
     $row = $stmt->fetch();
@@ -201,6 +246,48 @@ try {
         }
 
         $settingsInserted = true;
+    }
+
+    // Insert default hero features
+    $stmt = $conn->query("SELECT COUNT(*) as count FROM hero_features");
+    $row = $stmt->fetch();
+    if ($row['count'] == 0) {
+        $featureStmt = $conn->prepare("INSERT INTO hero_features (feature_text, order_index) VALUES (?, ?)");
+        $featureStmt->execute(['Under 3 minutes', 1]);
+        $featureStmt->execute(['No credit impact', 2]);
+        $featureStmt->execute(['Funding in 24 hours', 3]);
+    }
+
+    // Insert default loan types
+    $stmt = $conn->query("SELECT COUNT(*) as count FROM loan_types");
+    $row = $stmt->fetch();
+    if ($row['count'] == 0) {
+        $loanTypeStmt = $conn->prepare("INSERT INTO loan_types (title, description, icon_name, order_index) VALUES (?, ?, ?, ?)");
+        $loanTypeStmt->execute(['Short Term Loan', 'Quick funding with flexible terms for immediate business needs', 'clock', 1]);
+        $loanTypeStmt->execute(['Long Term Loan', 'Lower monthly payments for major investments and expansion', 'calendar', 2]);
+        $loanTypeStmt->execute(['Line of Credit', 'Revolving credit for ongoing operational expenses', 'refresh', 3]);
+        $loanTypeStmt->execute(['Merchant Cash Advance', 'Fast funding based on your daily credit card sales', 'credit-card', 4]);
+    }
+
+    // Insert default how it works steps
+    $stmt = $conn->query("SELECT COUNT(*) as count FROM how_it_works_steps");
+    $row = $stmt->fetch();
+    if ($row['count'] == 0) {
+        $stepStmt = $conn->prepare("INSERT INTO how_it_works_steps (step_number, title, description, order_index) VALUES (?, ?, ?, ?)");
+        $stepStmt->execute([1, 'Tell us about your business', 'Answer a few quick questions about your business and funding needs', 1]);
+        $stepStmt->execute([2, 'Review your matches', 'We\'ll match you with the best lenders from our trusted network', 2]);
+        $stepStmt->execute([3, 'Get funded', 'Choose your preferred offer and receive funding in as little as 24 hours', 3]);
+    }
+
+    // Insert default FAQs
+    $stmt = $conn->query("SELECT COUNT(*) as count FROM faqs");
+    $row = $stmt->fetch();
+    if ($row['count'] == 0) {
+        $faqStmt = $conn->prepare("INSERT INTO faqs (question, answer, order_index) VALUES (?, ?, ?)");
+        $faqStmt->execute(['How long does the application take?', 'Our streamlined application takes less than 3 minutes to complete. You\'ll answer some basic questions about your business and funding needs.', 1]);
+        $faqStmt->execute(['Will checking rates affect my credit score?', 'No. The initial review and offer comparison process does not impact your credit score. Only when you proceed with a specific lender might a hard credit check be required.', 2]);
+        $faqStmt->execute(['How quickly can I get funded?', 'Funding speed varies by lender and loan type. Many of our partners offer funding within 24 hours of approval, though some products may take longer.', 3]);
+        $faqStmt->execute(['What do I need to qualify?', 'Requirements vary by loan type and lender. Generally, you\'ll need to be in business for a minimum period and meet certain revenue thresholds. Our network includes options for various credit profiles.', 4]);
     }
 
     if ($settingsInserted) {

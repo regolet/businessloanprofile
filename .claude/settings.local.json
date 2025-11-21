@@ -20,7 +20,9 @@
       "Bash(mv:*)",
       "Bash(git reset:*)",
       "Bash(del nul)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(php --version:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
