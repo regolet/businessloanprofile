@@ -8,6 +8,30 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Maintenance Mode Check - Must run before page loads -->
+    <script>
+        // Check maintenance mode synchronously to prevent page flash
+        (async function checkMaintenanceMode() {
+            try {
+                const response = await fetch('api/admin-settings.php');
+                if (response.ok) {
+                    const settings = await response.json();
+                    console.log('Maintenance mode settings:', settings.system);
+
+                    // Check if maintenance mode is enabled
+                    if (settings.system && settings.system.maintenance_mode && settings.system.maintenance_mode.value === '1') {
+                        console.log('Maintenance mode is ON, redirecting...');
+                        window.location.replace('maintenance.html');
+                    } else {
+                        console.log('Maintenance mode is OFF');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking maintenance mode:', error);
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- Navigation -->
@@ -335,30 +359,6 @@
             </div>
         </div>
     </footer>
-
-    <!-- Maintenance Mode Check -->
-    <script>
-        // Check maintenance mode before loading the site
-        (async function checkMaintenanceMode() {
-            try {
-                const response = await fetch('api/admin-settings.php');
-                if (!response.ok) {
-                    console.error('Failed to check maintenance mode');
-                    return;
-                }
-
-                const settings = await response.json();
-
-                // Check if maintenance mode is enabled
-                if (settings.system && settings.system.maintenance_mode && settings.system.maintenance_mode.value === '1') {
-                    // Redirect to maintenance page
-                    window.location.href = 'maintenance.html';
-                }
-            } catch (error) {
-                console.error('Error checking maintenance mode:', error);
-            }
-        })();
-    </script>
 
     <script src="animations.js"></script>
     <script src="app.js"></script>

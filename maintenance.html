@@ -130,5 +130,25 @@
             </p>
         </div>
     </div>
+
+    <!-- Auto-redirect when maintenance mode is disabled -->
+    <script>
+        // Check every 10 seconds if maintenance mode is turned off
+        setInterval(async function() {
+            try {
+                const response = await fetch('api/admin-settings.php');
+                if (response.ok) {
+                    const settings = await response.json();
+
+                    // If maintenance mode is OFF, redirect back to index
+                    if (settings.system && settings.system.maintenance_mode && settings.system.maintenance_mode.value === '0') {
+                        window.location.href = 'index.html';
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking maintenance mode:', error);
+            }
+        }, 10000); // Check every 10 seconds
+    </script>
 </body>
 </html>
