@@ -87,10 +87,18 @@ try {
             title VARCHAR(255) NOT NULL,
             description TEXT,
             icon_name VARCHAR(50),
+            features TEXT,
             order_index INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+
+    // Add features column if it doesn't exist (migration)
+    try {
+        $conn->exec("ALTER TABLE loan_types ADD COLUMN features TEXT AFTER icon_name");
+    } catch (PDOException $e) {
+        // Column already exists, ignore error
+    }
 
     // Create how_it_works_steps table (dynamic)
     $conn->exec("

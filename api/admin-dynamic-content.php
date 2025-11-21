@@ -199,11 +199,12 @@ function createLoanType($conn) {
         return;
     }
 
-    $stmt = $conn->prepare("INSERT INTO loan_types (title, description, icon_name, order_index) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO loan_types (title, description, icon_name, features, order_index) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([
         $input['title'],
         $input['description'] ?? '',
         $input['icon_name'] ?? 'file-text',
+        $input['features'] ?? null,
         $input['order_index'] ?? 0
     ]);
 
@@ -222,11 +223,12 @@ function updateLoanType($conn, $id) {
     }
 
     $input = getJsonInput();
-    $stmt = $conn->prepare("UPDATE loan_types SET title = ?, description = ?, icon_name = ?, order_index = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE loan_types SET title = ?, description = ?, icon_name = ?, features = ?, order_index = ? WHERE id = ?");
     $stmt->execute([
         $input['title'],
         $input['description'] ?? '',
         $input['icon_name'] ?? 'file-text',
+        $input['features'] ?? null,
         $input['order_index'] ?? 0,
         $id
     ]);

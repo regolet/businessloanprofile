@@ -1190,9 +1190,29 @@ function displayLoanTypes() {
     loanTypes.forEach((type, index) => {
         const typeDiv = document.createElement('div');
         typeDiv.className = 'dynamic-item';
+
+        let featuresHTML = '';
+        if (type.features) {
+            try {
+                const features = JSON.parse(type.features);
+                if (Array.isArray(features) && features.length > 0) {
+                    featuresHTML = `
+                        <div class="form-group">
+                            <label>Features (Checklist)</label>
+                            <ul style="list-style: none; padding-left: 0; margin: 0.5rem 0;">
+                                ${features.map(f => `<li style="padding: 0.25rem 0; color: var(--text-muted);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 0.5rem;"><polyline points="20 6 9 17 4 12"/></svg>${escapeHtml(f)}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error('Error parsing features:', e);
+            }
+        }
+
         typeDiv.innerHTML = `
             <div class="dynamic-item-header">
-                <h4>${type.title}</h4>
+                <h4>${escapeHtml(type.title)}</h4>
                 <div class="dynamic-item-actions">
                     <button type="button" class="btn-icon" onclick="editLoanType(${type.id})" title="Edit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1210,16 +1230,17 @@ function displayLoanTypes() {
             </div>
             <div class="form-group">
                 <label>Title</label>
-                <input type="text" value="${type.title}" disabled>
+                <input type="text" value="${escapeHtml(type.title)}" disabled>
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <textarea rows="2" disabled>${type.description || ''}</textarea>
+                <textarea rows="2" disabled>${escapeHtml(type.description || '')}</textarea>
             </div>
             <div class="form-group">
                 <label>Icon Name</label>
-                <input type="text" value="${type.icon_name || ''}" disabled>
+                <input type="text" value="${escapeHtml(type.icon_name || '')}" disabled>
             </div>
+            ${featuresHTML}
         `;
         container.appendChild(typeDiv);
     });
@@ -1231,11 +1252,18 @@ function addLoanType() {
 
     const description = prompt('Enter description:');
     const iconName = prompt('Enter icon name (optional):') || 'file-text';
+    const featuresInput = prompt('Enter features (one per line, separate with | or newline):\n\nExample: Working capital needs|Inventory purchases|Equipment & marketing|Fast approval process');
+
+    let features = [];
+    if (featuresInput) {
+        features = featuresInput.split(/[|\n]/).map(f => f.trim()).filter(f => f.length > 0);
+    }
 
     saveLoanType({
         title,
         description,
         icon_name: iconName,
+        features: JSON.stringify(features),
         order_index: loanTypes.length + 1
     });
 }
@@ -1253,10 +1281,28 @@ function editLoanType(id) {
     const iconName = prompt('Edit icon name:', type.icon_name);
     if (iconName === null) return;
 
+    // Parse existing features
+    let existingFeatures = [];
+    if (type.features) {
+        try {
+            existingFeatures = JSON.parse(type.features);
+        } catch (e) {
+            console.error('Error parsing existing features:', e);
+        }
+    }
+
+    const featuresInput = prompt('Edit features (one per line, separate with | or newline):\n\nExample: Working capital needs|Inventory purchases|Equipment & marketing|Fast approval process', existingFeatures.join('\n'));
+
+    let features = [];
+    if (featuresInput) {
+        features = featuresInput.split(/[|\n]/).map(f => f.trim()).filter(f => f.length > 0);
+    }
+
     updateLoanType(id, {
         title,
         description,
         icon_name: iconName,
+        features: JSON.stringify(features),
         order_index: type.order_index
     });
 }
