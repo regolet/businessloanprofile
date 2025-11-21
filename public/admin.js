@@ -1,7 +1,5 @@
-// Use relative URL for API calls (works in both dev and production)
-const API_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:3000/api'
-    : '/api';
+// Use relative URL for API calls (PHP version)
+const API_URL = '/api';
 
 let leads = [];
 let filteredLeads = [];
@@ -75,7 +73,7 @@ function getAuthHeaders() {
 // Load leads
 async function loadLeads() {
     try {
-        const response = await fetch(`${API_URL}/admin/leads`, {
+        const response = await fetch(`${API_URL}/admin-leads.php`, {
             headers: getAuthHeaders()
         });
         leads = await response.json();
@@ -364,7 +362,7 @@ async function exportToCSV() {
         // Fetch full lead details including answers for all filtered leads
         const leadsWithAnswers = await Promise.all(
             filteredLeads.map(async (lead) => {
-                const response = await fetch(`${API_URL}/admin/leads/${lead.id}`, {
+                const response = await fetch(`${API_URL}/admin-leads.php?id=${lead.id}`, {
                     headers: getAuthHeaders()
                 });
                 return await response.json();
@@ -435,7 +433,7 @@ async function exportToJSON() {
         // Fetch full lead details including answers for all filtered leads
         const leadsWithAnswers = await Promise.all(
             filteredLeads.map(async (lead) => {
-                const response = await fetch(`${API_URL}/admin/leads/${lead.id}`, {
+                const response = await fetch(`${API_URL}/admin-leads.php?id=${lead.id}`, {
                     headers: getAuthHeaders()
                 });
                 return await response.json();
@@ -469,7 +467,7 @@ function downloadFile(content, filename, contentType) {
 // View lead details
 async function viewLead(leadId) {
     try {
-        const response = await fetch(`${API_URL}/admin/leads/${leadId}`, {
+        const response = await fetch(`${API_URL}/admin-leads.php?id=${leadId}`, {
             headers: getAuthHeaders()
         });
         const lead = await response.json();
@@ -534,7 +532,7 @@ function closeLeadModal() {
 // Load questions
 async function loadQuestions() {
     try {
-        const response = await fetch(`${API_URL}/questions`);
+        const response = await fetch(`${API_URL}/questions.php`);
         questions = await response.json();
 
         displayQuestions();
@@ -623,7 +621,7 @@ async function deleteQuestion(questionId) {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
-        const response = await fetch(`${API_URL}/admin/questions/${questionId}`, {
+        const response = await fetch(`${API_URL}/admin-questions.php?id=${questionId}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
         });
@@ -682,14 +680,14 @@ function setupQuestionForm() {
 
             if (questionId) {
                 // Update existing question
-                response = await fetch(`${API_URL}/admin/questions/${questionId}`, {
+                response = await fetch(`${API_URL}/admin-questions.php?id=${questionId}`, {
                     method: 'PUT',
                     headers: getAuthHeaders(),
                     body: JSON.stringify(data)
                 });
             } else {
                 // Create new question
-                response = await fetch(`${API_URL}/admin/questions`, {
+                response = await fetch(`${API_URL}/admin-questions.php`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify(data)

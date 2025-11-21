@@ -1,7 +1,5 @@
-// Use relative URL for API calls (works in both dev and production)
-const API_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:3000/api'
-    : '/api';
+// Use relative URL for API calls (PHP version)
+const API_URL = '/api';
 
 // Check if already logged in
 document.addEventListener('DOMContentLoaded', () => {
@@ -34,7 +32,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     `;
 
     try {
-        const response = await fetch(`${API_URL}/admin/login`, {
+        const response = await fetch(`${API_URL}/admin-login.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -84,7 +82,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 // Verify session token
 async function verifySession(token) {
     try {
-        const response = await fetch(`${API_URL}/admin/verify`, {
+        const response = await fetch(`${API_URL}/admin-verify.php`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

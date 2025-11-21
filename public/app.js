@@ -1,7 +1,5 @@
-// Use relative URL for API calls (works in both dev and production)
-const API_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:3000/api'
-    : '/api';
+// Use relative URL for API calls (PHP version)
+const API_URL = '/api';
 
 let questions = [];
 let currentQuestionIndex = 0;
@@ -21,7 +19,7 @@ function scrollToApply() {
 // Load questions from API
 async function loadQuestions() {
     try {
-        const response = await fetch(`${API_URL}/questions`);
+        const response = await fetch(`${API_URL}/questions.php`);
         questions = await response.json();
 
         if (questions.length > 0) {
@@ -182,7 +180,7 @@ function setupContactForm() {
 
         // Submit application
         try {
-            const response = await fetch(`${API_URL}/submit`, {
+            const response = await fetch(`${API_URL}/submit.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
