@@ -254,11 +254,11 @@ function displayLeadsTable() {
     tbody.innerHTML = pageLeads.map(lead => `
         <tr>
             <td>${lead.id}</td>
-            <td>${lead.name || '-'}</td>
-            <td>${lead.email || '-'}</td>
-            <td>${lead.phone || '-'}</td>
-            <td>${lead.business_name || '-'}</td>
-            <td>${lead.loan_amount || '-'}</td>
+            <td>${escapeHtml(lead.name) || '-'}</td>
+            <td>${escapeHtml(lead.email) || '-'}</td>
+            <td>${escapeHtml(lead.phone) || '-'}</td>
+            <td>${escapeHtml(lead.business_name) || '-'}</td>
+            <td>${escapeHtml(lead.loan_amount) || '-'}</td>
             <td>${formatDate(lead.created_at)}</td>
             <td>
                 <button class="btn-icon" onclick="viewLead(${lead.id})" title="View Details">
@@ -481,23 +481,23 @@ async function viewLead(leadId) {
             <div class="lead-info">
                 <div class="info-row">
                     <div class="info-label">Name:</div>
-                    <div class="info-value">${lead.name || '-'}</div>
+                    <div class="info-value">${escapeHtml(lead.name) || '-'}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Email:</div>
-                    <div class="info-value">${lead.email || '-'}</div>
+                    <div class="info-value">${escapeHtml(lead.email) || '-'}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Phone:</div>
-                    <div class="info-value">${lead.phone || '-'}</div>
+                    <div class="info-value">${escapeHtml(lead.phone) || '-'}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Business Name:</div>
-                    <div class="info-value">${lead.business_name || '-'}</div>
+                    <div class="info-value">${escapeHtml(lead.business_name) || '-'}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Loan Amount:</div>
-                    <div class="info-value">${lead.loan_amount || '-'}</div>
+                    <div class="info-value">${escapeHtml(lead.loan_amount) || '-'}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Submitted:</div>
@@ -508,14 +508,14 @@ async function viewLead(leadId) {
             <div class="answers-section">
                 <h3>Questionnaire Answers</h3>
                 ${lead.answers && lead.answers.length > 0 ?
-                    lead.answers.map(answer => `
+                lead.answers.map(answer => `
                         <div class="answer-item">
-                            <div class="answer-question">${answer.question_text}</div>
-                            <div class="answer-text">${answer.answer_text}</div>
+                            <div class="answer-question">${escapeHtml(answer.question_text)}</div>
+                            <div class="answer-text">${escapeHtml(answer.answer_text)}</div>
                         </div>
                     `).join('') :
-                    '<p>No answers recorded</p>'
-                }
+                '<p>No answers recorded</p>'
+            }
             </div>
         `;
 
@@ -555,7 +555,7 @@ function displayQuestions() {
     container.innerHTML = questions.map(question => `
         <div class="question-card">
             <div class="question-header">
-                <h3>${question.question_text}</h3>
+                <h3>${escapeHtml(question.question_text)}</h3>
                 <div class="btn-group">
                     <button class="btn-icon" onclick="editQuestion(${question.id})" title="Edit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -580,7 +580,7 @@ function displayQuestions() {
             ${question.options && question.options.length > 0 ? `
                 <div class="question-options">
                     <strong>Options:</strong>
-                    ${question.options.map(opt => `<p>• ${opt.option_text}</p>`).join('')}
+                    ${question.options.map(opt => `<p>• ${escapeHtml(opt.option_text)}</p>`).join('')}
                 </div>
             ` : ''}
         </div>
@@ -722,7 +722,7 @@ function formatDate(dateString) {
 }
 
 // Close modals when clicking outside
-window.onclick = function(event) {
+window.onclick = function (event) {
     const leadModal = document.getElementById('leadModal');
     const questionModal = document.getElementById('questionModal');
 
@@ -732,4 +732,17 @@ window.onclick = function(event) {
     if (event.target === questionModal) {
         closeQuestionModal();
     }
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    if (!text) return text;
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.toString().replace(/[&<>"']/g, m => map[m]);
 }

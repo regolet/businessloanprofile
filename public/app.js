@@ -36,52 +36,63 @@ async function loadQuestions() {
 
 // Display a question
 function displayQuestion(index) {
-    if (index >= questions.length) {
-        showContactForm();
-        return;
-    }
-
-    const question = questions[index];
     const container = document.getElementById('questionnaireContainer');
 
-    // Update progress
-    const progress = ((index + 1) / (questions.length + 1)) * 100;
-    document.getElementById('progressFill').style.width = `${progress}%`;
+    // Fade out existing content
+    container.style.opacity = '0';
+    container.style.transition = 'opacity 0.3s ease';
 
-    let optionsHtml = '';
+    setTimeout(() => {
+        if (index >= questions.length) {
+            showContactForm();
+            container.style.opacity = '1';
+            return;
+        }
 
-    if (question.question_type === 'multiple_choice' && question.options.length > 0) {
-        optionsHtml = '<div class="options">';
-        question.options.forEach(option => {
-            optionsHtml += `
-                <button class="option-button" onclick="selectOption(${index}, '${escapeHtml(option.option_text)}')">
-                    ${option.option_text}
-                </button>
+        const question = questions[index];
+
+        // Update progress
+        const progress = ((index + 1) / (questions.length + 1)) * 100;
+        document.getElementById('progressFill').style.width = `${progress}%`;
+
+        let optionsHtml = '';
+
+        if (question.question_type === 'multiple_choice' && question.options.length > 0) {
+            optionsHtml = '<div class="options">';
+            question.options.forEach(option => {
+                optionsHtml += `
+                    <button class="option-button" onclick="selectOption(${index}, '${escapeHtml(option.option_text)}')">
+                        ${escapeHtml(option.option_text)}
+                    </button>
+                `;
+            });
+            optionsHtml += '</div>';
+        } else if (question.question_type === 'text') {
+            optionsHtml = `
+                <textarea class="text-input" id="textAnswer${index}" rows="4"
+                    placeholder="Type your answer here..."></textarea>
             `;
-        });
-        optionsHtml += '</div>';
-    } else if (question.question_type === 'text') {
-        optionsHtml = `
-            <textarea class="text-input" id="textAnswer${index}" rows="4"
-                placeholder="Type your answer here..."></textarea>
-        `;
-    }
+        }
 
-    container.innerHTML = `
-        <div class="question">
-            <div class="question-number">Question ${index + 1} of ${questions.length}</div>
-            <h3>${question.question_text}</h3>
-            ${optionsHtml}
-            <div class="question-buttons">
-                ${index > 0 ? '<button class="btn-secondary" onclick="previousQuestion()">Back</button>' : ''}
-                ${question.question_type === 'text' ?
-                    `<button class="btn-primary" onclick="nextQuestion(${index})">Next</button>` :
-                    ''}
+        container.innerHTML = `
+            <div class="question animate-fadeIn">
+                <div class="question-number">Question ${index + 1} of ${questions.length}</div>
+                <h3>${escapeHtml(question.question_text)}</h3>
+                ${optionsHtml}
+                <div class="question-buttons">
+                    ${index > 0 ? '<button class="btn-secondary" onclick="previousQuestion()">Back</button>' : ''}
+                    ${question.question_type === 'text' ?
+                `<button class="btn-primary" onclick="nextQuestion(${index})">Next</button>` :
+                ''}
+                </div>
             </div>
-        </div>
-    `;
+        `;
 
-    currentQuestionIndex = index;
+        currentQuestionIndex = index;
+
+        // Fade in new content
+        container.style.opacity = '1';
+    }, 300);
 }
 
 // Select an option (for multiple choice)
@@ -206,6 +217,7 @@ function setupContactForm() {
 
 // Helper function to escape HTML
 function escapeHtml(text) {
+    if (!text) return text;
     const map = {
         '&': '&amp;',
         '<': '&lt;',
@@ -213,5 +225,5 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return text.toString().replace(/[&<>"']/g, m => map[m]);
 }
