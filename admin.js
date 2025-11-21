@@ -840,10 +840,15 @@ async function loadSettings() {
 function displaySettings() {
     // Company settings
     if (siteSettings.company) {
-        document.getElementById('company_name').value = siteSettings.company.name?.value || '';
-        document.getElementById('company_email').value = siteSettings.company.email?.value || '';
-        document.getElementById('company_phone').value = siteSettings.company.phone?.value || '';
-        document.getElementById('company_address').value = siteSettings.company.address?.value || '';
+        const companyName = document.getElementById('company_name');
+        const companyEmail = document.getElementById('company_email');
+        const companyPhone = document.getElementById('company_phone');
+        const companyAddress = document.getElementById('company_address');
+
+        if (companyName) companyName.value = siteSettings.company.name?.value || '';
+        if (companyEmail) companyEmail.value = siteSettings.company.email?.value || '';
+        if (companyPhone) companyPhone.value = siteSettings.company.phone?.value || '';
+        if (companyAddress) companyAddress.value = siteSettings.company.address?.value || '';
     }
 
     // Hero section
@@ -893,8 +898,11 @@ function displaySettings() {
     // FAQ
     if (siteSettings.faq) {
         for (let i = 1; i <= 4; i++) {
-            document.getElementById(`faq_faq${i}_question`).value = siteSettings.faq[`faq${i}_question`]?.value || '';
-            document.getElementById(`faq_faq${i}_answer`).value = siteSettings.faq[`faq${i}_answer`]?.value || '';
+            const questionEl = document.getElementById(`faq_faq${i}_question`);
+            const answerEl = document.getElementById(`faq_faq${i}_answer`);
+
+            if (questionEl) questionEl.value = siteSettings.faq[`faq${i}_question`]?.value || '';
+            if (answerEl) answerEl.value = siteSettings.faq[`faq${i}_answer`]?.value || '';
         }
     }
 }
