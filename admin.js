@@ -838,6 +838,12 @@ async function loadSettings() {
 
 // Display settings in form
 function displaySettings() {
+    // System settings
+    if (siteSettings.system) {
+        const maintenanceMode = document.getElementById('maintenance_mode');
+        if (maintenanceMode) maintenanceMode.checked = siteSettings.system.maintenance_mode?.value === '1';
+    }
+
     // Company settings
     if (siteSettings.company) {
         const companyName = document.getElementById('company_name');
@@ -916,6 +922,7 @@ function setupSettingsForm() {
 
         const formData = new FormData(form);
         const settings = {
+            system: {},
             company: {},
             hero: {},
             hero_features: {},
@@ -924,11 +931,17 @@ function setupSettingsForm() {
             faq: {}
         };
 
+        // Handle maintenance mode checkbox separately
+        const maintenanceCheckbox = document.getElementById('maintenance_mode');
+        settings.system.maintenance_mode = maintenanceCheckbox.checked ? '1' : '0';
+
         // Organize form data by category
         for (let [name, value] of formData.entries()) {
+            if (name === 'maintenance_mode') continue; // Skip checkbox, handled above
+
             const parts = name.split('_');
             const category = parts[0];
-            
+
             if (category === 'hero' && parts[1] === 'features') {
                 settings.hero_features[parts.slice(2).join('_')] = value;
             } else if (category === 'loan' && parts[1] === 'types') {

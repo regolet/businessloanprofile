@@ -219,6 +219,9 @@ try {
     if ($row['count'] == 0) {
         // Insert default settings
         $defaultSettings = [
+            // System Settings
+            ['system', 'maintenance_mode', '0', 'text'],
+
             // Company Profile
             ['company', 'name', 'BusinessLoansProfile', 'text'],
             ['company', 'email', 'info@businessloans.com', 'email'],
