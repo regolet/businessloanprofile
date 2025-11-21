@@ -123,10 +123,26 @@ async function loadLeads() {
         const response = await fetch(`${API_URL}/admin-leads.php`, {
             headers: getAuthHeaders()
         });
-        leads = await response.json();
 
-        // Sort by created_at descending by default
-        leads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        if (response.status === 401) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            console.error('Invalid response format:', data);
+            leads = [];
+        } else {
+            leads = data;
+            // Sort by created_at descending by default
+            leads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
 
         filteredLeads = [...leads];
         displayLeadsStats();
@@ -802,8 +818,18 @@ async function loadSettings() {
         const response = await fetch(`${API_URL}/admin-settings.php`, {
             headers: getAuthHeaders()
         });
+
+        if (response.status === 401) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         siteSettings = await response.json();
-        
+
         displaySettings();
     } catch (error) {
         console.error('Error loading settings:', error);
@@ -822,30 +848,46 @@ function displaySettings() {
 
     // Hero section
     if (siteSettings.hero) {
-        document.getElementById('hero_title').value = siteSettings.hero.title?.value || '';
-        document.getElementById('hero_subtitle').value = siteSettings.hero.subtitle?.value || '';
-        document.getElementById('hero_cta_text').value = siteSettings.hero.cta_text?.value || '';
-        document.getElementById('hero_note').value = siteSettings.hero.note?.value || '';
-        document.getElementById('hero_image_url').value = siteSettings.hero.image_url?.value || '';
+        const heroTitle = document.getElementById('hero_title');
+        const heroSubtitle = document.getElementById('hero_subtitle');
+        const heroCtaText = document.getElementById('hero_cta_text');
+        const heroNote = document.getElementById('hero_note');
+        const heroImageUrl = document.getElementById('hero_image_url');
+
+        if (heroTitle) heroTitle.value = siteSettings.hero.title?.value || '';
+        if (heroSubtitle) heroSubtitle.value = siteSettings.hero.subtitle?.value || '';
+        if (heroCtaText) heroCtaText.value = siteSettings.hero.cta_text?.value || '';
+        if (heroNote) heroNote.value = siteSettings.hero.note?.value || '';
+        if (heroImageUrl) heroImageUrl.value = siteSettings.hero.image_url?.value || '';
     }
 
     // Hero features
     if (siteSettings.hero_features) {
-        document.getElementById('hero_features_feature1_text').value = siteSettings.hero_features.feature1_text?.value || '';
-        document.getElementById('hero_features_feature2_text').value = siteSettings.hero_features.feature2_text?.value || '';
-        document.getElementById('hero_features_feature3_text').value = siteSettings.hero_features.feature3_text?.value || '';
+        const feature1 = document.getElementById('hero_features_feature1_text');
+        const feature2 = document.getElementById('hero_features_feature2_text');
+        const feature3 = document.getElementById('hero_features_feature3_text');
+
+        if (feature1) feature1.value = siteSettings.hero_features.feature1_text?.value || '';
+        if (feature2) feature2.value = siteSettings.hero_features.feature2_text?.value || '';
+        if (feature3) feature3.value = siteSettings.hero_features.feature3_text?.value || '';
     }
 
     // Loan types
     if (siteSettings.loan_types) {
-        document.getElementById('loan_types_section_title').value = siteSettings.loan_types.section_title?.value || '';
-        document.getElementById('loan_types_section_subtitle').value = siteSettings.loan_types.section_subtitle?.value || '';
+        const loanTypesTitle = document.getElementById('loan_types_section_title');
+        const loanTypesSubtitle = document.getElementById('loan_types_section_subtitle');
+
+        if (loanTypesTitle) loanTypesTitle.value = siteSettings.loan_types.section_title?.value || '';
+        if (loanTypesSubtitle) loanTypesSubtitle.value = siteSettings.loan_types.section_subtitle?.value || '';
     }
 
     // How it works
     if (siteSettings.how_it_works) {
-        document.getElementById('how_it_works_section_title').value = siteSettings.how_it_works.section_title?.value || '';
-        document.getElementById('how_it_works_section_subtitle').value = siteSettings.how_it_works.section_subtitle?.value || '';
+        const howItWorksTitle = document.getElementById('how_it_works_section_title');
+        const howItWorksSubtitle = document.getElementById('how_it_works_section_subtitle');
+
+        if (howItWorksTitle) howItWorksTitle.value = siteSettings.how_it_works.section_title?.value || '';
+        if (howItWorksSubtitle) howItWorksSubtitle.value = siteSettings.how_it_works.section_subtitle?.value || '';
     }
 
     // FAQ
@@ -960,7 +1002,25 @@ async function loadHeroFeatures() {
         const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features`, {
             headers: getAuthHeaders()
         });
-        heroFeatures = await response.json();
+
+        if (response.status === 401) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            console.error('Invalid response format:', data);
+            heroFeatures = [];
+        } else {
+            heroFeatures = data;
+        }
+
         displayHeroFeatures();
     } catch (error) {
         console.error('Error loading hero features:', error);
@@ -1086,7 +1146,25 @@ async function loadLoanTypes() {
         const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types`, {
             headers: getAuthHeaders()
         });
-        loanTypes = await response.json();
+
+        if (response.status === 401) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            console.error('Invalid response format:', data);
+            loanTypes = [];
+        } else {
+            loanTypes = data;
+        }
+
         displayLoanTypes();
     } catch (error) {
         console.error('Error loading loan types:', error);
@@ -1239,7 +1317,25 @@ async function loadHowItWorksSteps() {
         const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works`, {
             headers: getAuthHeaders()
         });
-        howItWorksSteps = await response.json();
+
+        if (response.status === 401) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            console.error('Invalid response format:', data);
+            howItWorksSteps = [];
+        } else {
+            howItWorksSteps = data;
+        }
+
         displayHowItWorksSteps();
     } catch (error) {
         console.error('Error loading how it works steps:', error);
@@ -1394,7 +1490,25 @@ async function loadFAQs() {
         const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs`, {
             headers: getAuthHeaders()
         });
-        faqs = await response.json();
+
+        if (response.status === 401) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            console.error('Invalid response format:', data);
+            faqs = [];
+        } else {
+            faqs = data;
+        }
+
         displayFAQs();
     } catch (error) {
         console.error('Error loading FAQs:', error);

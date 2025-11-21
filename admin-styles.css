@@ -827,15 +827,53 @@ h6 {
         font-size: 1.75rem;
     }
 
-    /* Table controls stack vertically */
+    /* Table controls mobile layout */
     .table-controls {
-        flex-direction: column;
+        display: flex;
+        flex-wrap: wrap;
         gap: 1rem;
     }
 
-    .search-group,
-    .filter-group {
+    /* Search bar - full width, first row */
+    .table-controls .search-group {
+        order: 1;
         width: 100%;
+        flex: 0 0 100%;
+    }
+
+    /* Date filters - side by side, second row */
+    .table-controls .filter-group:nth-of-type(2) {
+        order: 2;
+        width: calc(50% - 0.5rem);
+        flex: 0 0 calc(50% - 0.5rem);
+    }
+
+    .table-controls .filter-group:nth-of-type(3) {
+        order: 3;
+        width: calc(50% - 0.5rem);
+        flex: 0 0 calc(50% - 0.5rem);
+    }
+
+    /* Export buttons - left side, third row */
+    .table-controls .export-group {
+        order: 4;
+        display: flex;
+        gap: 0.5rem;
+        flex: 0 0 auto;
+    }
+
+    /* Clear All button - right side, third row */
+    .table-controls .btn-secondary {
+        order: 5;
+        width: auto;
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
+
+    /* Make export buttons smaller on mobile if needed */
+    .export-group button {
+        font-size: 0.875rem;
+        padding: 0.625rem 1rem;
     }
 
     /* Pagination controls */
