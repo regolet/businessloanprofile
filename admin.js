@@ -1111,14 +1111,17 @@ async function saveHeroFeature(data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadHeroFeatures();
+            alert('Feature added successfully!');
         } else {
-            alert('Error saving feature');
+            alert('Error saving feature: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving feature:', error);
-        alert('Error saving feature');
+        alert('Error saving feature: ' + error.message);
     }
 }
 
@@ -1130,14 +1133,17 @@ async function updateHeroFeature(id, data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadHeroFeatures();
+            alert('Feature updated successfully!');
         } else {
-            alert('Error updating feature');
+            alert('Error updating feature: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error updating feature:', error);
-        alert('Error updating feature');
+        alert('Error updating feature: ' + error.message);
     }
 }
 
@@ -1150,14 +1156,17 @@ async function deleteHeroFeature(id) {
             headers: getAuthHeaders()
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadHeroFeatures();
+            alert('Feature deleted successfully!');
         } else {
-            alert('Error deleting feature');
+            alert('Error deleting feature: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error deleting feature:', error);
-        alert('Error deleting feature');
+        alert('Error deleting feature: ' + error.message);
     }
 }
 
@@ -1328,14 +1337,17 @@ async function saveLoanType(data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadLoanTypes();
+            alert('Loan type added successfully!');
         } else {
-            alert('Error saving loan type');
+            alert('Error saving loan type: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving loan type:', error);
-        alert('Error saving loan type');
+        alert('Error saving loan type: ' + error.message);
     }
 }
 
@@ -1347,14 +1359,17 @@ async function updateLoanType(id, data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadLoanTypes();
+            alert('Loan type updated successfully!');
         } else {
-            alert('Error updating loan type');
+            alert('Error updating loan type: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error updating loan type:', error);
-        alert('Error updating loan type');
+        alert('Error updating loan type: ' + error.message);
     }
 }
 
@@ -1367,14 +1382,17 @@ async function deleteLoanType(id) {
             headers: getAuthHeaders()
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadLoanTypes();
+            alert('Loan type deleted successfully!');
         } else {
-            alert('Error deleting loan type');
+            alert('Error deleting loan type: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error deleting loan type:', error);
-        alert('Error deleting loan type');
+        alert('Error deleting loan type: ' + error.message);
     }
 }
 
@@ -1511,14 +1529,17 @@ async function saveHowItWorksStep(data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadHowItWorksSteps();
+            alert('Step added successfully!');
         } else {
-            alert('Error saving step');
+            alert('Error saving step: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving step:', error);
-        alert('Error saving step');
+        alert('Error saving step: ' + error.message);
     }
 }
 
@@ -1530,14 +1551,17 @@ async function updateHowItWorksStep(id, data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadHowItWorksSteps();
+            alert('Step updated successfully!');
         } else {
-            alert('Error updating step');
+            alert('Error updating step: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error updating step:', error);
-        alert('Error updating step');
+        alert('Error updating step: ' + error.message);
     }
 }
 
@@ -1550,14 +1574,17 @@ async function deleteHowItWorksStep(id) {
             headers: getAuthHeaders()
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadHowItWorksSteps();
+            alert('Step deleted successfully!');
         } else {
-            alert('Error deleting step');
+            alert('Error deleting step: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error deleting step:', error);
-        alert('Error deleting step');
+        alert('Error deleting step: ' + error.message);
     }
 }
 
@@ -1673,14 +1700,17 @@ async function saveFAQ(data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadFAQs();
+            alert('FAQ added successfully!');
         } else {
-            alert('Error saving FAQ');
+            alert('Error saving FAQ: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving FAQ:', error);
-        alert('Error saving FAQ');
+        alert('Error saving FAQ: ' + error.message);
     }
 }
 
@@ -1692,14 +1722,17 @@ async function updateFAQ(id, data) {
             body: JSON.stringify(data)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadFAQs();
+            alert('FAQ updated successfully!');
         } else {
-            alert('Error updating FAQ');
+            alert('Error updating FAQ: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error updating FAQ:', error);
-        alert('Error updating FAQ');
+        alert('Error updating FAQ: ' + error.message);
     }
 }
 
@@ -1712,13 +1745,16 @@ async function deleteFAQ(id) {
             headers: getAuthHeaders()
         });
 
+        const result = await response.json();
+
         if (response.ok) {
             await loadFAQs();
+            alert('FAQ deleted successfully!');
         } else {
-            alert('Error deleting FAQ');
+            alert('Error deleting FAQ: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error deleting FAQ:', error);
-        alert('Error deleting FAQ');
+        alert('Error deleting FAQ: ' + error.message);
     }
 }
