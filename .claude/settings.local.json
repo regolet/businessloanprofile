@@ -19,7 +19,8 @@
       "Bash(move:*)",
       "Bash(mv:*)",
       "Bash(git reset:*)",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

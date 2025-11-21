@@ -10,7 +10,7 @@ This application runs on standard PHP shared hosting (Namecheap, HostGator, Blue
 
 ### Quick Deploy (15 minutes):
 1. Create MySQL database in cPanel
-2. Upload `api/` and `public/` folders
+2. Upload all files to `public_html/`
 3. Configure `api/config.php` with database credentials
 4. Visit `http://yourdomain.com/api/setup.php` once
 5. Done! 🎉
@@ -62,7 +62,7 @@ businessloanprofile/
 │   ├── admin-leads.php          # Lead management
 │   └── admin-questions.php      # Question management
 │
-├── public/                      # Frontend
+├── Frontend Files (root)
 │   ├── index.html              # Main landing page
 │   ├── admin.html              # Admin panel
 │   ├── login.html              # Admin login page
@@ -89,7 +89,7 @@ businessloanprofile/
    - Database name, username, and password
 
 2. **Upload Files**
-   - Upload `api/` and `public/` folders to `public_html/`
+   - Upload all files to `public_html/` (including `api/` folder and all HTML/CSS/JS files)
 
 3. **Configure Database**
    - Edit `api/config.php`:
@@ -107,8 +107,8 @@ businessloanprofile/
    - Delete `setup.php` after successful setup
 
 5. **Access Your Site**
-   - Main: `http://yourdomain.com/public/index.html`
-   - Admin: `http://yourdomain.com/public/login.html`
+   - Main: `http://yourdomain.com/index.html` (or just `http://yourdomain.com`)
+   - Admin: `http://yourdomain.com/login.html`
 
 ### Default Admin Credentials
 
@@ -131,7 +131,7 @@ define('ADMIN_PASSWORD', 'admin123');  // Change this!
 6. Submit application
 
 ### For Admins
-1. Navigate to `/public/login.html`
+1. Navigate to `/login.html`
 2. Log in with your credentials
 3. View and manage submitted leads
 4. Export data to CSV or JSON

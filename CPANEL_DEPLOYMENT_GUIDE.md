@@ -36,10 +36,13 @@ This guide will help you deploy the Business Loan Profile application to your Na
 
 1. Go to cPanel **File Manager**
 2. Navigate to **public_html/** (or a subdirectory if you want, e.g., `public_html/loans/`)
-3. Upload these folders and files:
+3. Upload all project files:
    ```
    api/               (all PHP files)
-   public/            (HTML, CSS, JS, images)
+   *.html             (index.html, admin.html, login.html)
+   *.css              (all stylesheet files)
+   *.js               (all JavaScript files)
+   images/            (logo and SVG files)
    .htaccess          (if exists)
    ```
 
@@ -51,8 +54,11 @@ This guide will help you deploy the Business Loan Profile application to your Na
 
 **Files to upload:**
 - Entire `api/` folder with all `.php` files
-- Entire `public/` folder with all assets
-- DO NOT upload `server/`, `node_modules/`, or `.git/` folders
+- All HTML files (index.html, admin.html, login.html)
+- All CSS files (styles.css, admin-styles.css, login-styles.css)
+- All JS files (app.js, admin.js, login.js, animations.js)
+- `images/` folder with logo and SVG files
+- DO NOT upload `.git/`, `.claude/`, or documentation `.md` files
 
 ## Step 3: Configure Database Connection
 
@@ -112,12 +118,12 @@ If you installed the application in a subdirectory (not in root `public_html/`),
 ## Step 6: Test the Application
 
 ### Test Main Site:
-1. Visit: `http://yourdomain.com/public/index.html`
+1. Visit: `http://yourdomain.com` or `http://yourdomain.com/index.html`
 2. You should see the landing page with loan information
 3. Try filling out the questionnaire to test if it works
 
 ### Test Admin Login:
-1. Visit: `http://yourdomain.com/public/login.html`
+1. Visit: `http://yourdomain.com/login.html`
 2. Log in with the credentials you set in `config.php`
 3. You should be redirected to the admin panel
 
@@ -128,40 +134,25 @@ If you installed the application in a subdirectory (not in root `public_html/`),
 
 ## Step 7: Optional - Set up Clean URLs
 
-To remove `/public/` from URLs and make `index.html` the default page:
-
-### Method 1: Move files (Recommended)
-
-Move all files from `public/` folder to root:
-```
-public_html/
-├── api/
-├── index.html
-├── admin.html
-├── login.html
-├── styles.css
-├── admin-styles.css
-├── app.js
-├── admin.js
-├── login.js
-├── animations.js
-└── images/
-```
-
-### Method 2: Use .htaccess redirect
+To make the site accessible at just `http://yourdomain.com` (without `/index.html`):
 
 Create/edit `.htaccess` in `public_html/`:
 
 ```apache
-# Redirect root to public folder
-DirectoryIndex public/index.html
+# Set default index page
+DirectoryIndex index.html
 
-# Optional: Remove .html extensions
+# Optional: Remove .html extensions for cleaner URLs
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^([^\.]+)$ $1.html [NC,L]
 ```
+
+With this setup:
+- `http://yourdomain.com` → Shows index.html
+- `http://yourdomain.com/admin` → Shows admin.html
+- `http://yourdomain.com/login` → Shows login.html
 
 ## Troubleshooting
 
@@ -239,6 +230,6 @@ If you encounter issues:
 **Your application is now live! 🎉**
 
 Access your sites:
-- Main site: `http://yourdomain.com/public/index.html`
-- Admin login: `http://yourdomain.com/public/login.html`
-- Admin panel: `http://yourdomain.com/public/admin.html`
+- Main site: `http://yourdomain.com` or `http://yourdomain.com/index.html`
+- Admin login: `http://yourdomain.com/login.html`
+- Admin panel: `http://yourdomain.com/admin.html` (accessed after login)
