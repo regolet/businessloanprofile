@@ -28,6 +28,42 @@ function logout() {
     }
 }
 
+// Toggle mobile menu
+function toggleMobileMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const burgerMenu = document.getElementById('burgerMenu');
+    const body = document.body;
+
+    sidebar.classList.toggle('active');
+    burgerMenu.classList.toggle('active');
+    body.classList.toggle('menu-open');
+}
+
+// Close mobile menu when clicking a nav item
+document.addEventListener('DOMContentLoaded', () => {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const burgerMenu = document.getElementById('burgerMenu');
+                const body = document.body;
+
+                sidebar.classList.remove('active');
+                burgerMenu.classList.remove('active');
+                body.classList.remove('menu-open');
+            }
+        });
+    });
+
+    // Close menu when clicking overlay
+    document.body.addEventListener('click', (e) => {
+        if (e.target === document.body && document.body.classList.contains('menu-open')) {
+            toggleMobileMenu();
+        }
+    });
+});
+
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', () => {
     // Check authentication first

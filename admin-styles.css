@@ -709,14 +709,103 @@ h6 {
     }
 }
 
+/* Mobile Header */
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    z-index: 1001;
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-header h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Burger Menu */
+.burger-menu {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    transition: var(--transition);
+}
+
+.burger-menu span {
+    width: 24px;
+    height: 2px;
+    background: var(--text-main);
+    transition: var(--transition);
+    border-radius: 2px;
+}
+
+.burger-menu.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.burger-menu.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger-menu.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
 @media (max-width: 768px) {
+    .mobile-header {
+        display: flex;
+    }
+
     .sidebar {
-        display: none;
-        /* Or implement mobile drawer */
+        position: fixed;
+        left: -280px;
+        top: 60px;
+        height: calc(100vh - 60px);
+        width: 280px;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.active {
+        left: 0;
     }
 
     .main-content {
         margin-left: 0;
+        padding-top: 80px;
+    }
+
+    /* Overlay when menu is open */
+    body.menu-open::before {
+        content: '';
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
     }
 }
 /* Settings Section Styles */
