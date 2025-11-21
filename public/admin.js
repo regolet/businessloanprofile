@@ -4,7 +4,13 @@ const API_URL = window.location.hostname === 'localhost'
     : '/api';
 
 let leads = [];
+let filteredLeads = [];
 let questions = [];
+let currentPage = 1;
+let rowsPerPage = 20;
+let sortColumn = 'created_at';
+let sortDirection = 'desc';
+let searchTerm = '';
 
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', () => {
@@ -41,8 +47,13 @@ async function loadLeads() {
         const response = await fetch(`${API_URL}/admin/leads`);
         leads = await response.json();
 
+        // Sort by created_at descending by default
+        leads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        filteredLeads = [...leads];
         displayLeadsStats();
         displayLeadsTable();
+        updatePagination();
     } catch (error) {
         console.error('Error loading leads:', error);
     }
@@ -57,31 +68,157 @@ function displayLeadsStats() {
     weekAgo.setDate(weekAgo.getDate() - 7);
     weekAgo.setHours(0, 0, 0, 0);
 
-    const todayLeads = leads.filter(lead => {
+    const todayLeads = filteredLeads.filter(lead => {
         const leadDate = new Date(lead.created_at);
         return leadDate >= today;
     }).length;
 
-    const weekLeads = leads.filter(lead => {
+    const weekLeads = filteredLeads.filter(lead => {
         const leadDate = new Date(lead.created_at);
         return leadDate >= weekAgo;
     }).length;
 
-    document.getElementById('totalLeads').textContent = leads.length;
+    document.getElementById('totalLeads').textContent = filteredLeads.length;
     document.getElementById('todayLeads').textContent = todayLeads;
     document.getElementById('weekLeads').textContent = weekLeads;
 }
 
-// Display leads table
+// Search function
+function applySearch() {
+    searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    applyFilters();
+}
+
+// Combined filter function
+function applyFilters() {
+    const fromDate = document.getElementById('filterDateFrom').value;
+    const toDate = document.getElementById('filterDateTo').value;
+
+    filteredLeads = leads.filter(lead => {
+        // Search filter
+        let matchesSearch = true;
+        if (searchTerm) {
+            const searchableText = [
+                lead.name || '',
+                lead.email || '',
+                lead.phone || '',
+                lead.business_name || '',
+                lead.loan_amount || ''
+            ].join(' ').toLowerCase();
+
+            matchesSearch = searchableText.includes(searchTerm);
+        }
+
+        // Date filter
+        let matchesDate = true;
+        if (fromDate || toDate) {
+            const leadDate = new Date(lead.created_at);
+            leadDate.setHours(0, 0, 0, 0);
+
+            if (fromDate && toDate) {
+                const from = new Date(fromDate);
+                const to = new Date(toDate);
+                matchesDate = leadDate >= from && leadDate <= to;
+            } else if (fromDate) {
+                const from = new Date(fromDate);
+                matchesDate = leadDate >= from;
+            } else if (toDate) {
+                const to = new Date(toDate);
+                matchesDate = leadDate <= to;
+            }
+        }
+
+        return matchesSearch && matchesDate;
+    });
+
+    currentPage = 1;
+    displayLeadsStats();
+    displayLeadsTable();
+    updatePagination();
+}
+
+// Clear all filters
+function clearAllFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value = '';
+    searchTerm = '';
+    filteredLeads = [...leads];
+    currentPage = 1;
+    displayLeadsStats();
+    displayLeadsTable();
+    updatePagination();
+}
+
+// Sort table
+function sortTable(column) {
+    if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+    }
+
+    filteredLeads.sort((a, b) => {
+        let aVal = a[column] || '';
+        let bVal = b[column] || '';
+
+        // Handle dates
+        if (column === 'created_at') {
+            aVal = new Date(aVal);
+            bVal = new Date(bVal);
+        }
+
+        // Handle numbers
+        if (column === 'id') {
+            aVal = parseInt(aVal);
+            bVal = parseInt(bVal);
+        }
+
+        if (sortDirection === 'asc') {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+
+    displayLeadsTable();
+    updateSortIcons();
+}
+
+function updateSortIcons() {
+    document.querySelectorAll('.sortable').forEach(th => {
+        const icon = th.querySelector('.sort-icon');
+        icon.style.opacity = '0.3';
+        icon.style.transform = 'rotate(0deg)';
+    });
+
+    const activeColumn = Array.from(document.querySelectorAll('.sortable'))
+        .find(th => th.textContent.trim().toLowerCase().includes(sortColumn.replace('_', ' ')));
+
+    if (activeColumn) {
+        const icon = activeColumn.querySelector('.sort-icon');
+        icon.style.opacity = '1';
+        if (sortDirection === 'asc') {
+            icon.style.transform = 'rotate(180deg)';
+        }
+    }
+}
+
+// Display leads table with pagination
 function displayLeadsTable() {
     const tbody = document.getElementById('leadsTableBody');
 
-    if (leads.length === 0) {
+    if (filteredLeads.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="loading">No leads found</td></tr>';
         return;
     }
 
-    tbody.innerHTML = leads.map(lead => `
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, filteredLeads.length);
+    const pageLeads = filteredLeads.slice(startIndex, endIndex);
+
+    tbody.innerHTML = pageLeads.map(lead => `
         <tr>
             <td>${lead.id}</td>
             <td>${lead.name || '-'}</td>
@@ -91,10 +228,125 @@ function displayLeadsTable() {
             <td>${lead.loan_amount || '-'}</td>
             <td>${formatDate(lead.created_at)}</td>
             <td>
-                <button class="btn-primary btn-small" onclick="viewLead(${lead.id})">View</button>
+                <button class="btn-icon" onclick="viewLead(${lead.id})" title="View Details">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
             </td>
         </tr>
     `).join('');
+
+    updateSortIcons();
+}
+
+// Pagination functions
+function updatePagination() {
+    const totalPages = Math.ceil(filteredLeads.length / rowsPerPage);
+    const startIndex = (currentPage - 1) * rowsPerPage + 1;
+    const endIndex = Math.min(startIndex + rowsPerPage - 1, filteredLeads.length);
+
+    document.getElementById('showingFrom').textContent = filteredLeads.length > 0 ? startIndex : 0;
+    document.getElementById('showingTo').textContent = filteredLeads.length > 0 ? endIndex : 0;
+    document.getElementById('totalRecords').textContent = filteredLeads.length;
+
+    // Update page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    let pagesHTML = '';
+
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage < maxPagesToShow - 1) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pagesHTML += `<button class="btn-page ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+    }
+
+    pageNumbers.innerHTML = pagesHTML;
+
+    // Enable/disable buttons
+    document.getElementById('firstPageBtn').disabled = currentPage === 1;
+    document.getElementById('prevPageBtn').disabled = currentPage === 1;
+    document.getElementById('nextPageBtn').disabled = currentPage === totalPages || totalPages === 0;
+    document.getElementById('lastPageBtn').disabled = currentPage === totalPages || totalPages === 0;
+}
+
+function goToPage(page) {
+    currentPage = page;
+    displayLeadsTable();
+    updatePagination();
+}
+
+function previousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        displayLeadsTable();
+        updatePagination();
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(filteredLeads.length / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayLeadsTable();
+        updatePagination();
+    }
+}
+
+function goToLastPage() {
+    const totalPages = Math.ceil(filteredLeads.length / rowsPerPage);
+    currentPage = totalPages;
+    displayLeadsTable();
+    updatePagination();
+}
+
+function changeRowsPerPage() {
+    rowsPerPage = parseInt(document.getElementById('rowsPerPage').value);
+    currentPage = 1;
+    displayLeadsTable();
+    updatePagination();
+}
+
+// Export functions
+function exportToCSV() {
+    const headers = ['ID', 'Name', 'Email', 'Phone', 'Business', 'Loan Amount', 'Date'];
+    const csvContent = [
+        headers.join(','),
+        ...filteredLeads.map(lead => [
+            lead.id,
+            `"${lead.name || ''}"`,
+            `"${lead.email || ''}"`,
+            `"${lead.phone || ''}"`,
+            `"${lead.business_name || ''}"`,
+            `"${lead.loan_amount || ''}"`,
+            `"${formatDate(lead.created_at)}"`
+        ].join(','))
+    ].join('\n');
+
+    downloadFile(csvContent, 'leads-export.csv', 'text/csv');
+}
+
+function exportToJSON() {
+    const jsonContent = JSON.stringify(filteredLeads, null, 2);
+    downloadFile(jsonContent, 'leads-export.json', 'application/json');
+}
+
+function downloadFile(content, filename, contentType) {
+    const blob = new Blob([content], { type: contentType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
 }
 
 // View lead details
@@ -186,8 +438,20 @@ function displayQuestions() {
             <div class="question-header">
                 <h3>${question.question_text}</h3>
                 <div class="btn-group">
-                    <button class="btn-secondary btn-small" onclick="editQuestion(${question.id})">Edit</button>
-                    <button class="btn-danger btn-small" onclick="deleteQuestion(${question.id})">Delete</button>
+                    <button class="btn-icon" onclick="editQuestion(${question.id})" title="Edit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button class="btn-icon btn-icon-danger" onclick="deleteQuestion(${question.id})" title="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
             <div class="question-meta">

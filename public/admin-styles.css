@@ -72,7 +72,9 @@ body {
 }
 
 .nav-item .icon {
-    font-size: 1.3rem;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
 }
 
 /* Main Content */
@@ -204,6 +206,37 @@ body {
 
 .btn-danger:hover {
     background: #dc2626;
+}
+
+.btn-icon {
+    background: var(--light-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.btn-icon:hover svg {
+    stroke: white;
+}
+
+.btn-icon-danger {
+    border-color: var(--danger-color);
+}
+
+.btn-icon-danger:hover {
+    background: var(--danger-color);
+    border-color: var(--danger-color);
 }
 
 .btn-group {
@@ -415,6 +448,196 @@ body {
 
 .answer-text {
     color: var(--text-color);
+}
+
+/* Table Controls */
+.table-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.search-group {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.search-group svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.search-group input {
+    width: 100%;
+    padding: 0.6rem 0.75rem 0.6rem 2.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s;
+}
+
+.search-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.search-group input::placeholder {
+    color: var(--text-secondary);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.filter-group input[type="date"] {
+    padding: 0.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.export-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+/* Sortable columns */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.sortable:hover {
+    background: var(--gray-100);
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-left: 0.5rem;
+    opacity: 0.3;
+    transition: all 0.3s;
+    vertical-align: middle;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-pagination {
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-pagination:hover:not(:disabled) svg {
+    stroke: white;
+}
+
+.btn-pagination:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.btn-page {
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    min-width: 35px;
+}
+
+.btn-page:hover {
+    background: var(--gray-100);
+}
+
+.btn-page.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.rows-per-page {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rows-per-page label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.rows-per-page select {
+    padding: 0.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
 }
 
 /* Responsive */
