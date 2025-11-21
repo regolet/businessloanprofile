@@ -4,9 +4,41 @@ const cors = require('cors');
 const path = require('path');
 const db = require('./database');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Simple in-memory session store (for production, use Redis or database)
+const sessions = new Map();
+
+// Default admin credentials (change these in production!)
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+
+// Generate session token
+function generateToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// Verify session middleware
+function verifySession(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const token = authHeader.substring(7);
+  const session = sessions.get(token);
+
+  if (!session || session.expiresAt < Date.now()) {
+    sessions.delete(token);
+    return res.status(401).json({ error: 'Session expired' });
+  }
+
+  req.session = session;
+  next();
+}
 
 // Middleware
 app.use(cors());
@@ -26,6 +58,53 @@ const transporter = nodemailer.createTransport({
 });
 
 // API Routes
+
+// Admin login
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    const token = generateToken();
+    const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+
+    sessions.set(token, {
+      username,
+      createdAt: Date.now(),
+      expiresAt
+    });
+
+    res.json({
+      success: true,
+      token,
+      message: 'Login successful'
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Invalid username or password'
+    });
+  }
+});
+
+// Verify session
+app.get('/api/admin/verify', verifySession, (req, res) => {
+  res.json({
+    success: true,
+    username: req.session.username
+  });
+});
+
+// Admin logout
+app.post('/api/admin/logout', verifySession, (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader.substring(7);
+  sessions.delete(token);
+
+  res.json({
+    success: true,
+    message: 'Logged out successfully'
+  });
+});
 
 // Get all questions
 app.get('/api/questions', (req, res) => {
@@ -55,8 +134,8 @@ app.get('/api/questions', (req, res) => {
   });
 });
 
-// Create a new question (Admin)
-app.post('/api/admin/questions', (req, res) => {
+// Create a new question (Admin - Protected)
+app.post('/api/admin/questions', verifySession, (req, res) => {
   const { question_text, question_type, order_index, options } = req.body;
 
   db.run(
@@ -83,8 +162,8 @@ app.post('/api/admin/questions', (req, res) => {
   );
 });
 
-// Update a question (Admin)
-app.put('/api/admin/questions/:id', (req, res) => {
+// Update a question (Admin - Protected)
+app.put('/api/admin/questions/:id', verifySession, (req, res) => {
   const { id } = req.params;
   const { question_text, question_type, order_index, options } = req.body;
 
@@ -112,8 +191,8 @@ app.put('/api/admin/questions/:id', (req, res) => {
   );
 });
 
-// Delete a question (Admin)
-app.delete('/api/admin/questions/:id', (req, res) => {
+// Delete a question (Admin - Protected)
+app.delete('/api/admin/questions/:id', verifySession, (req, res) => {
   const { id } = req.params;
 
   db.run('DELETE FROM questions WHERE id = ?', [id], function(err) {
@@ -186,8 +265,8 @@ app.post('/api/submit', async (req, res) => {
   );
 });
 
-// Get all leads (Admin)
-app.get('/api/admin/leads', (req, res) => {
+// Get all leads (Admin - Protected)
+app.get('/api/admin/leads', verifySession, (req, res) => {
   db.all('SELECT * FROM leads ORDER BY created_at DESC', [], (err, rows) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -196,8 +275,8 @@ app.get('/api/admin/leads', (req, res) => {
   });
 });
 
-// Get lead details with answers (Admin)
-app.get('/api/admin/leads/:id', (req, res) => {
+// Get lead details with answers (Admin - Protected)
+app.get('/api/admin/leads/:id', verifySession, (req, res) => {
   const { id } = req.params;
 
   db.get('SELECT * FROM leads WHERE id = ?', [id], (err, lead) => {

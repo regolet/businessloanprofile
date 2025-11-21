@@ -12,8 +12,30 @@ let sortColumn = 'created_at';
 let sortDirection = 'desc';
 let searchTerm = '';
 
+// Check authentication
+function checkAuth() {
+    const sessionToken = localStorage.getItem('adminSession');
+    if (!sessionToken) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    return sessionToken;
+}
+
+// Logout function
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('adminSession');
+        window.location.href = 'login.html';
+    }
+}
+
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', () => {
+    // Check authentication first
+    const token = checkAuth();
+    if (!token) return;
+
     loadLeads();
     loadQuestions();
     setupQuestionForm();
@@ -41,10 +63,21 @@ function showSection(section) {
     }
 }
 
+// Get auth headers
+function getAuthHeaders() {
+    const token = localStorage.getItem('adminSession');
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
 // Load leads
 async function loadLeads() {
     try {
-        const response = await fetch(`${API_URL}/admin/leads`);
+        const response = await fetch(`${API_URL}/admin/leads`, {
+            headers: getAuthHeaders()
+        });
         leads = await response.json();
 
         // Sort by created_at descending by default
@@ -352,7 +385,9 @@ function downloadFile(content, filename, contentType) {
 // View lead details
 async function viewLead(leadId) {
     try {
-        const response = await fetch(`${API_URL}/admin/leads/${leadId}`);
+        const response = await fetch(`${API_URL}/admin/leads/${leadId}`, {
+            headers: getAuthHeaders()
+        });
         const lead = await response.json();
 
         const modal = document.getElementById('leadModal');
@@ -505,7 +540,8 @@ async function deleteQuestion(questionId) {
 
     try {
         const response = await fetch(`${API_URL}/admin/questions/${questionId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
 
         if (response.ok) {
@@ -564,14 +600,14 @@ function setupQuestionForm() {
                 // Update existing question
                 response = await fetch(`${API_URL}/admin/questions/${questionId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(data)
                 });
             } else {
                 // Create new question
                 response = await fetch(`${API_URL}/admin/questions`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(data)
                 });
             }

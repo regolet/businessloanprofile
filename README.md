@@ -12,10 +12,17 @@ A modern, responsive business loan application website with dynamic questionnair
 - **Responsive Design** - Works on desktop, tablet, and mobile devices
 
 ### Admin Panel
+- **Secure Login** - Password-protected admin access with session management
 - **Lead Management** - View all submitted applications with detailed information
+  - Search by name, email, phone, or business
+  - Date range filtering
+  - Export to CSV or JSON
+  - Pagination (10/20/50/100 rows)
+  - Sortable columns
 - **Question Management** - Create, edit, and delete custom questionnaire questions
 - **Statistics Dashboard** - Track total leads, today's leads, and weekly leads
 - **Multiple Question Types** - Support for multiple choice and text input questions
+- **Modern UI** - Professional design with SVG icons and minimalistic interface
 
 ## Tech Stack
 
@@ -31,7 +38,7 @@ A modern, responsive business loan application website with dynamic questionnair
 npm install
 ```
 
-2. (Optional) Configure email settings:
+2. (Optional) Configure email and admin credentials:
 Create a `.env` file in the root directory:
 ```env
 SMTP_HOST=smtp.gmail.com
@@ -39,7 +46,11 @@ SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 ADMIN_EMAIL=admin@yourdomain.com
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
 ```
+
+**IMPORTANT**: Change the default admin credentials before deploying to production!
 
 3. Start the server:
 ```bash
@@ -48,7 +59,17 @@ npm start
 
 4. Open your browser:
 - **Public Site**: http://localhost:3000
-- **Admin Panel**: http://localhost:3000/admin.html
+- **Admin Login**: http://localhost:3000/login.html
+- **Admin Panel**: http://localhost:3000/admin.html (requires login)
+
+### Default Admin Credentials
+
+```
+Username: admin
+Password: admin123
+```
+
+**⚠️ SECURITY WARNING**: These are default credentials for development only. Change them before deploying to production using environment variables!
 
 ## Deployment to Vercel
 
