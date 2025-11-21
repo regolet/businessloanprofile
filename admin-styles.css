@@ -791,9 +791,71 @@ h6 {
         left: 0;
     }
 
+    .sidebar .nav-item {
+        padding: 16px 20px;
+        justify-content: flex-start;
+    }
+
+    .sidebar .nav-item .icon {
+        margin-right: 12px;
+    }
+
+    .sidebar .nav-item span {
+        display: inline !important;
+        font-size: 0.95rem;
+    }
+
     .main-content {
         margin-left: 0;
         padding-top: 80px;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* Stats cards - single column on mobile */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1.25rem;
+    }
+
+    .stat-card h3 {
+        font-size: 1.75rem;
+    }
+
+    /* Table controls stack vertically */
+    .table-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-group,
+    .filter-group {
+        width: 100%;
+    }
+
+    /* Pagination controls */
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .pagination-info,
+    .pagination-controls,
+    .rows-per-page {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Form actions */
+    .form-actions {
+        padding: 1.5rem 1rem;
+        position: static;
     }
 
     /* Overlay when menu is open */
