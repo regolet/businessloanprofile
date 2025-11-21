@@ -826,6 +826,7 @@ function displaySettings() {
         document.getElementById('hero_subtitle').value = siteSettings.hero.subtitle?.value || '';
         document.getElementById('hero_cta_text').value = siteSettings.hero.cta_text?.value || '';
         document.getElementById('hero_note').value = siteSettings.hero.note?.value || '';
+        document.getElementById('hero_image_url').value = siteSettings.hero.image_url?.value || '';
     }
 
     // Hero features

@@ -214,6 +214,7 @@ try {
             ['hero', 'subtitle', 'Compare multiple loan options at once and select the best fit with confidence. You\'re in the driver\'s seat.', 'textarea'],
             ['hero', 'cta_text', 'Get Started', 'text'],
             ['hero', 'note', 'Answer some basic questions with no impact to your credit score', 'text'],
+            ['hero', 'image_url', 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&auto=format&fit=crop', 'text'],
 
             // Hero Features
             ['hero_features', 'feature1_text', 'Under 3 minutes', 'text'],
