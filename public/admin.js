@@ -347,27 +347,111 @@ function changeRowsPerPage() {
 }
 
 // Export functions
-function exportToCSV() {
-    const headers = ['ID', 'Name', 'Email', 'Phone', 'Business', 'Loan Amount', 'Date'];
-    const csvContent = [
-        headers.join(','),
-        ...filteredLeads.map(lead => [
-            lead.id,
-            `"${lead.name || ''}"`,
-            `"${lead.email || ''}"`,
-            `"${lead.phone || ''}"`,
-            `"${lead.business_name || ''}"`,
-            `"${lead.loan_amount || ''}"`,
-            `"${formatDate(lead.created_at)}"`
-        ].join(','))
-    ].join('\n');
+async function exportToCSV() {
+    const btn = document.getElementById('exportCsvBtn');
+    const originalText = btn.innerHTML;
 
-    downloadFile(csvContent, 'leads-export.csv', 'text/csv');
+    try {
+        // Show loading state
+        btn.disabled = true;
+        btn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Exporting...
+        `;
+
+        // Fetch full lead details including answers for all filtered leads
+        const leadsWithAnswers = await Promise.all(
+            filteredLeads.map(async (lead) => {
+                const response = await fetch(`${API_URL}/admin/leads/${lead.id}`, {
+                    headers: getAuthHeaders()
+                });
+                return await response.json();
+            })
+        );
+
+        // Get all unique questions from all leads
+        const allQuestions = new Set();
+        leadsWithAnswers.forEach(lead => {
+            if (lead.answers) {
+                lead.answers.forEach(answer => {
+                    allQuestions.add(answer.question_text);
+                });
+            }
+        });
+        const questionsList = Array.from(allQuestions);
+
+        // Create headers
+        const headers = ['ID', 'Name', 'Email', 'Phone', 'Business', 'Loan Amount', 'Date', ...questionsList];
+
+        // Create rows with answers
+        const rows = leadsWithAnswers.map(lead => {
+            const baseData = [
+                lead.id,
+                `"${(lead.name || '').replace(/"/g, '""')}"`,
+                `"${(lead.email || '').replace(/"/g, '""')}"`,
+                `"${(lead.phone || '').replace(/"/g, '""')}"`,
+                `"${(lead.business_name || '').replace(/"/g, '""')}"`,
+                `"${(lead.loan_amount || '').replace(/"/g, '""')}"`,
+                `"${formatDate(lead.created_at)}"`
+            ];
+
+            // Add answers in the same order as questions
+            const answers = questionsList.map(question => {
+                const answer = lead.answers?.find(a => a.question_text === question);
+                return `"${(answer?.answer_text || '').replace(/"/g, '""')}"`;
+            });
+
+            return [...baseData, ...answers].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...rows].join('\n');
+        downloadFile(csvContent, 'leads-export.csv', 'text/csv');
+    } catch (error) {
+        console.error('Error exporting to CSV:', error);
+        alert('Error exporting to CSV. Please try again.');
+    } finally {
+        // Restore button state
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
 }
 
-function exportToJSON() {
-    const jsonContent = JSON.stringify(filteredLeads, null, 2);
-    downloadFile(jsonContent, 'leads-export.json', 'application/json');
+async function exportToJSON() {
+    const btn = document.getElementById('exportJsonBtn');
+    const originalText = btn.innerHTML;
+
+    try {
+        // Show loading state
+        btn.disabled = true;
+        btn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Exporting...
+        `;
+
+        // Fetch full lead details including answers for all filtered leads
+        const leadsWithAnswers = await Promise.all(
+            filteredLeads.map(async (lead) => {
+                const response = await fetch(`${API_URL}/admin/leads/${lead.id}`, {
+                    headers: getAuthHeaders()
+                });
+                return await response.json();
+            })
+        );
+
+        const jsonContent = JSON.stringify(leadsWithAnswers, null, 2);
+        downloadFile(jsonContent, 'leads-export.json', 'application/json');
+    } catch (error) {
+        console.error('Error exporting to JSON:', error);
+        alert('Error exporting to JSON. Please try again.');
+    } finally {
+        // Restore button state
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
 }
 
 function downloadFile(content, filename, contentType) {
