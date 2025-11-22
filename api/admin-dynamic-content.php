@@ -104,9 +104,10 @@ function createHeroFeature($conn) {
         return;
     }
 
-    $stmt = $conn->prepare("INSERT INTO hero_features (feature_text, order_index) VALUES (?, ?)");
+    $stmt = $conn->prepare("INSERT INTO hero_features (feature_text, icon_name, order_index) VALUES (?, ?, ?)");
     $stmt->execute([
         $input['feature_text'],
+        $input['icon_name'] ?? null,
         $input['order_index'] ?? 0
     ]);
 
@@ -125,9 +126,10 @@ function updateHeroFeature($conn, $id) {
     }
 
     $input = getJsonInput();
-    $stmt = $conn->prepare("UPDATE hero_features SET feature_text = ?, order_index = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE hero_features SET feature_text = ?, icon_name = ?, order_index = ? WHERE id = ?");
     $stmt->execute([
         $input['feature_text'],
+        $input['icon_name'] ?? null,
         $input['order_index'] ?? 0,
         $id
     ]);

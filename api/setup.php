@@ -75,6 +75,7 @@ try {
         CREATE TABLE IF NOT EXISTS hero_features (
             id INT AUTO_INCREMENT PRIMARY KEY,
             feature_text VARCHAR(255) NOT NULL,
+            icon_name VARCHAR(50) DEFAULT NULL,
             order_index INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

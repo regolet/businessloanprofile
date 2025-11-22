@@ -884,16 +884,26 @@ h6 {
     }
 
     .mobile-cta {
-        display: block;
-        background: var(--primary-color);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 100px;
-        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        color: var(--primary-color);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid var(--primary-color);
+        font-weight: 700;
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: 1.25rem;
         margin-left: auto;
         margin-right: 16px;
+        transition: all 0.2s;
+    }
+
+    .mobile-cta:hover {
+        background: var(--primary-color);
+        color: white;
     }
 
     .nav-cta {
@@ -901,21 +911,83 @@ h6 {
     }
 
     .hero {
-        padding: 100px 0 60px;
+        padding: 80px 0 40px;
     }
 
     .hero-content h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
+        line-height: 1.2;
+        margin-bottom: 16px;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 24px;
+    }
+
+    .hero-note {
+        font-size: 0.875rem;
+        margin-bottom: 24px;
+    }
+
+    .hero-features {
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .feature {
+        font-size: 0.875rem;
+    }
+
+    .feature-icon {
+        width: 18px;
+        height: 18px;
     }
 
     .section-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+        font-size: 0.9375rem;
+        margin-bottom: 32px;
+    }
+
+    section {
+        padding: 48px 0;
     }
 
     .loan-grid,
     .steps,
     .footer-content {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .loan-card {
+        padding: 24px;
+    }
+
+    .loan-card h3 {
+        font-size: 1.25rem;
+    }
+
+    .loan-card p {
+        font-size: 0.9375rem;
+        margin-bottom: 16px;
+    }
+
+    .step {
+        padding: 24px;
+    }
+
+    .step h3 {
+        font-size: 1.25rem;
+    }
+
+    .step p {
+        font-size: 0.9375rem;
     }
 
     .application-container {
@@ -923,44 +995,105 @@ h6 {
     }
 
     .question h3 {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
     .media-logos {
-        gap: 32px;
+        gap: 24px;
+        padding: 24px 0;
     }
 
     .media-logo-img {
-        max-width: 120px;
+        max-width: 100px;
+    }
+
+    .faq-item {
+        padding: 20px;
+    }
+
+    .faq-question h3 {
+        font-size: 1rem;
+    }
+
+    .faq-answer {
+        font-size: 0.9375rem;
     }
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 20px;
+        padding: 0 16px;
+    }
+
+    .hero {
+        padding: 60px 0 32px;
     }
 
     .hero-content h1 {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9375rem;
+        margin-bottom: 20px;
+    }
+
+    .hero-note {
+        font-size: 0.8125rem;
+        margin-bottom: 20px;
     }
 
     .hero-features {
         flex-direction: column;
         align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
     }
 
     .feature {
         width: 100%;
         justify-content: center;
+        font-size: 0.8125rem;
+    }
+
+    .feature-icon {
+        width: 16px;
+        height: 16px;
     }
 
     .cta-button {
         width: 100%;
         justify-content: center;
+        padding: 14px 24px;
+        font-size: 0.9375rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    section {
+        padding: 40px 0;
+    }
+
+    .loan-card,
+    .step,
+    .faq-item {
+        padding: 20px;
+    }
+
+    .media-logos {
+        gap: 20px;
+        padding: 20px 0;
+    }
+
+    .media-logo-img {
+        max-width: 90px;
     }
 
     .footer-content {
-        gap: 40px;
+        gap: 32px;
     }
 }
 

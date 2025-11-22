@@ -150,7 +150,7 @@ function showSection(section) {
         document.getElementById('thinkingSection').style.display = 'none';
         document.getElementById('questionsSection').style.display = 'none';
         document.getElementById('settingsSection').style.display = 'block';
-        document.getElementById('sectionTitle').textContent = 'Site Settings';
+        document.getElementById('sectionTitle').textContent = 'Page Settings';
         document.getElementById('addNewBtn').style.display = 'none';
     }
 }
@@ -917,11 +917,19 @@ function displaySettings() {
     // Company settings
     if (siteSettings.company) {
         const companyName = document.getElementById('company_name');
+        const companyLogoUrl = document.getElementById('company_logo_url');
         const companyEmail = document.getElementById('company_email');
         const companyPhone = document.getElementById('company_phone');
         const companyAddress = document.getElementById('company_address');
 
         if (companyName) companyName.value = siteSettings.company.name?.value || '';
+        if (companyLogoUrl) {
+            companyLogoUrl.value = siteSettings.company.logo_url?.value || '';
+            // Show preview if logo URL exists
+            if (siteSettings.company.logo_url?.value) {
+                updateLogoPreview(siteSettings.company.logo_url.value);
+            }
+        }
         if (companyEmail) companyEmail.value = siteSettings.company.email?.value || '';
         if (companyPhone) companyPhone.value = siteSettings.company.phone?.value || '';
         if (companyAddress) companyAddress.value = siteSettings.company.address?.value || '';
@@ -1050,6 +1058,106 @@ function setupSettingsForm() {
             showNotification('Error saving settings. Please try again.', 'error');
         }
     });
+
+    // Add logo URL preview listener
+    const logoUrlInput = document.getElementById('company_logo_url');
+    if (logoUrlInput) {
+        logoUrlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                updateLogoPreview(url);
+            } else {
+                hideLogoPreview();
+            }
+        });
+    }
+}
+
+// Update logo preview
+function updateLogoPreview(url) {
+    const preview = document.getElementById('logoPreview');
+    const previewImg = document.getElementById('logoPreviewImg');
+
+    if (preview && previewImg && url) {
+        previewImg.src = url;
+        previewImg.onerror = function() {
+            hideLogoPreview();
+        };
+        previewImg.onload = function() {
+            preview.style.display = 'block';
+        };
+    }
+}
+
+// Hide logo preview
+function hideLogoPreview() {
+    const preview = document.getElementById('logoPreview');
+    if (preview) {
+        preview.style.display = 'none';
+    }
+}
+
+// Handle logo upload
+async function handleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showNotification('Please select an image file', 'error');
+        return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        showNotification('Image size must be less than 2MB', 'error');
+        return;
+    }
+
+    const uploadStatus = document.getElementById('uploadStatus');
+    uploadStatus.textContent = 'Uploading...';
+    uploadStatus.style.color = 'var(--primary-color)';
+
+    try {
+        const formData = new FormData();
+        formData.append('logo', file);
+
+        const response = await fetch(`${API_URL}/upload-logo.php`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('admin_token')
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            const logoUrl = result.url;
+            document.getElementById('company_logo_url').value = logoUrl;
+            updateLogoPreview(logoUrl);
+            uploadStatus.textContent = '✓ Uploaded successfully';
+            uploadStatus.style.color = '#10b981';
+            showNotification('Logo uploaded successfully!', 'success');
+        } else {
+            throw new Error(result.error || 'Upload failed');
+        }
+    } catch (error) {
+        console.error('Error uploading logo:', error);
+        uploadStatus.textContent = '✗ Upload failed';
+        uploadStatus.style.color = '#ef4444';
+        showNotification('Error uploading logo: ' + error.message, 'error');
+    }
+}
+
+// Remove logo
+async function removeLogo() {
+    if (!confirm('Are you sure you want to remove the logo?')) return;
+
+    document.getElementById('company_logo_url').value = '';
+    hideLogoPreview();
+    document.getElementById('uploadStatus').textContent = '';
+    showNotification('Logo removed. Click Save Settings to apply changes.', 'info');
 }
 
 // ============= SETTINGS TAB SWITCHING =============
@@ -1142,6 +1250,14 @@ function displayHeroFeatures() {
     heroFeatures.forEach((feature) => {
         const featureDiv = document.createElement('div');
         featureDiv.className = 'dynamic-item';
+
+        const iconDisplay = feature.icon_name
+            ? `<div class="form-group">
+                <label>Icon</label>
+                <input type="text" value="${escapeHtml(feature.icon_name)}" disabled>
+               </div>`
+            : '';
+
         featureDiv.innerHTML = `
             <div class="dynamic-item-header">
                 <h4>${escapeHtml(feature.feature_text)}</h4>
@@ -1164,6 +1280,7 @@ function displayHeroFeatures() {
                 <label>Feature Text</label>
                 <input type="text" value="${escapeHtml(feature.feature_text)}" id="feature_${feature.id}" disabled>
             </div>
+            ${iconDisplay}
         `;
         container.appendChild(featureDiv);
     });
@@ -1200,6 +1317,7 @@ function editHeroFeature(id) {
     document.getElementById('heroFeatureModalTitle').textContent = 'Edit Hero Feature';
     document.getElementById('heroFeatureId').value = feature.id;
     document.getElementById('heroFeatureText').value = feature.feature_text;
+    document.getElementById('heroFeatureIcon').value = feature.icon_name || '';
     document.getElementById('heroFeatureOrder').value = feature.order_index;
     document.getElementById('heroFeatureModal').style.display = 'block';
 
@@ -1215,8 +1333,11 @@ async function saveHeroFeature(event) {
     event.preventDefault();
 
     const id = document.getElementById('heroFeatureId').value;
+    const iconValue = document.getElementById('heroFeatureIcon').value;
+
     const data = {
         feature_text: document.getElementById('heroFeatureText').value,
+        icon_name: iconValue || null,
         order_index: parseInt(document.getElementById('heroFeatureOrder').value)
     };
 
@@ -2238,19 +2359,25 @@ function renderThinkingLeads() {
                                 ${formatDateTime(lead.created_at)}
                             </td>
                             <td style="padding: 16px; text-align: center;">
-                                <button onclick="viewThinkingLead(${lead.id})"
-                                        style="background: var(--primary-color); color: white; border: none; padding: 8px 16px;
-                                               border-radius: 6px; cursor: pointer; margin-right: 6px; font-size: 0.875rem; font-weight: 500; transition: all 0.2s;"
+                                <button onclick="viewThinkingLead(${lead.id})" title="View"
+                                        style="background: var(--primary-color); color: white; border: none; padding: 8px;
+                                               border-radius: 6px; cursor: pointer; margin-right: 6px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;"
                                         onmouseover="this.style.opacity='0.9'"
                                         onmouseout="this.style.opacity='1'">
-                                    View
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
                                 </button>
-                                <button onclick="deleteThinkingLead(${lead.id})"
-                                        style="background: #ef4444; color: white; border: none; padding: 8px 16px;
-                                               border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s;"
+                                <button onclick="deleteThinkingLead(${lead.id})" title="Delete"
+                                        style="background: #ef4444; color: white; border: none; padding: 8px;
+                                               border-radius: 6px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;"
                                         onmouseover="this.style.opacity='0.9'"
                                         onmouseout="this.style.opacity='1'">
-                                    Delete
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
                                 </button>
                             </td>
                         </tr>

@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadAllDynamicContent() {
-    console.log('Starting to load dynamic content...');
-
     try {
         // Load settings and dynamic content in parallel
         const [settings, heroFeatures, loanTypes, howItWorksSteps, faqs] = await Promise.all([
@@ -23,21 +21,16 @@ async function loadAllDynamicContent() {
             fetchDynamicContent('faqs')
         ]);
 
-        console.log('Loaded data:', { settings, heroFeatures, loanTypes, howItWorksSteps, faqs });
-
         // Populate the page
         if (settings) {
+            populateCompanyLogo(settings);
             populateHeroSection(settings);
             populateLoanTypesSection(settings, loanTypes);
             populateHowItWorksSection(settings, howItWorksSteps);
-        } else {
-            console.error('No settings loaded!');
         }
 
         if (heroFeatures) populateHeroFeatures(heroFeatures);
         if (faqs) populateFAQs(faqs, settings);
-
-        console.log('Dynamic content loading complete!');
 
     } catch (error) {
         console.error('Error loading dynamic content:', error);
@@ -68,46 +61,53 @@ async function fetchDynamicContent(type) {
     return [];
 }
 
+// Populate Company Logo
+function populateCompanyLogo(settings) {
+    const company = settings.company;
+    if (!company || !company.logo_url || !company.logo_url.value) return;
+
+    const logoUrl = company.logo_url.value;
+
+    // Update all logo images on the page
+    const logoImages = document.querySelectorAll('img[alt*="Logo"], img[alt*="logo"]');
+    logoImages.forEach(img => {
+        img.src = logoUrl;
+    });
+}
+
 // Populate Hero Section
 function populateHeroSection(settings) {
     const hero = settings.hero;
     if (!hero) return;
 
-    console.log('Populating hero section with:', hero);
-
     // Hero title
     const titleEl = document.querySelector('.hero-content h1');
     if (titleEl && hero.title) {
         titleEl.textContent = hero.title.value;
-        console.log('Updated hero title to:', hero.title.value);
     }
 
     // Hero subtitle
     const subtitleEl = document.querySelector('.hero-subtitle');
     if (subtitleEl && hero.subtitle) {
         subtitleEl.textContent = hero.subtitle.value;
-        console.log('Updated hero subtitle');
     }
 
     // CTA button text
     const ctaButton = document.querySelector('.cta-button');
     if (ctaButton && hero.cta_text) {
         ctaButton.textContent = hero.cta_text.value + ' →';
-        console.log('Updated CTA button');
     }
 
     // Hero note
     const noteEl = document.querySelector('.hero-note');
     if (noteEl && hero.note) {
         noteEl.textContent = hero.note.value;
-        console.log('Updated hero note');
     }
 
     // Hero image
     const imageEl = document.querySelector('.hero-image img');
     if (imageEl && hero.image_url) {
         imageEl.src = hero.image_url.value;
-        console.log('Updated hero image');
     }
 }
 
@@ -126,9 +126,13 @@ function populateHeroFeatures(features) {
     sortedFeatures.forEach(feature => {
         const featureDiv = document.createElement('div');
         featureDiv.className = 'feature';
+
+        // Use custom icon if specified, otherwise use default checkmark
+        const iconPath = feature.icon_name ? getIconPath(feature.icon_name) : '<polyline points="20 6 9 17 4 12"/>';
+
         featureDiv.innerHTML = `
             <svg class="feature-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
+                ${iconPath}
             </svg>
             <span>${escapeHtml(feature.feature_text)}</span>
         `;
@@ -138,37 +142,27 @@ function populateHeroFeatures(features) {
 
 // Populate Loan Types Section
 function populateLoanTypesSection(settings, loanTypes) {
-    console.log('Populating loan types with settings:', settings.loan_types, 'and data:', loanTypes);
-
     // Section titles
     if (settings.loan_types) {
         const titleEl = document.querySelector('#loan-types .section-title');
         if (titleEl && settings.loan_types.section_title) {
             titleEl.textContent = settings.loan_types.section_title.value;
-            console.log('Updated loan types title');
         }
 
         const subtitleEl = document.querySelector('#loan-types .section-subtitle');
         if (subtitleEl && settings.loan_types.section_subtitle) {
             subtitleEl.textContent = settings.loan_types.section_subtitle.value;
-            console.log('Updated loan types subtitle');
         }
     }
 
     // Loan type cards
     const container = document.querySelector('.loan-grid');
-    if (!container) {
-        console.error('Loan grid container not found!');
-        return;
-    }
-
-    console.log('Populating loan types, count:', loanTypes.length);
+    if (!container) return;
 
     // Clear existing cards (always clear hardcoded HTML)
     container.innerHTML = '';
 
     if (loanTypes.length === 0) {
-        console.log('No loan types in database - showing empty message');
         container.innerHTML = '<p style="text-align: center; padding: 40px; color: #64748b;">No loan types configured yet. Please add them in the admin panel.</p>';
         return;
     }
@@ -230,34 +224,24 @@ function populateLoanTypesSection(settings, loanTypes) {
 
 // Populate How It Works Section
 function populateHowItWorksSection(settings, steps) {
-    console.log('Populating how it works with settings:', settings.how_it_works, 'and data:', steps);
-
     // Section titles
     if (settings.how_it_works) {
         const titleEl = document.querySelector('#how-it-works .section-title');
         if (titleEl && settings.how_it_works.section_title) {
             titleEl.textContent = settings.how_it_works.section_title.value;
-            console.log('Updated how it works title');
         }
 
         const subtitleEl = document.querySelector('#how-it-works .section-subtitle');
         if (subtitleEl && settings.how_it_works.section_subtitle) {
             subtitleEl.textContent = settings.how_it_works.section_subtitle.value;
-            console.log('Updated how it works subtitle');
         }
     }
 
     // Steps
     const container = document.querySelector('.steps');
-    if (!container) {
-        console.error('Steps container not found!');
-        return;
-    }
+    if (!container) return;
 
-    if (steps.length === 0) {
-        console.log('No steps to display');
-        return;
-    }
+    if (steps.length === 0) return;
 
     // Clear existing steps
     container.innerHTML = '';
@@ -286,18 +270,11 @@ function populateHowItWorksSection(settings, steps) {
 
 // Populate FAQs
 function populateFAQs(faqs, settings) {
-    console.log('Populating FAQs with data:', faqs);
 
     const container = document.querySelector('.faq-grid');
-    if (!container) {
-        console.error('FAQ container not found!');
-        return;
-    }
+    if (!container) return;
 
-    if (faqs.length === 0) {
-        console.log('No FAQs to display');
-        return;
-    }
+    if (faqs.length === 0) return;
 
     // Clear existing FAQs
     container.innerHTML = '';

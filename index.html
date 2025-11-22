@@ -18,14 +18,9 @@
                 const response = await fetch('api/public-settings.php');
                 if (response.ok) {
                     const settings = await response.json();
-                    console.log('Maintenance mode settings:', settings.system);
-
                     // Check if maintenance mode is enabled
                     if (settings.system && settings.system.maintenance_mode && settings.system.maintenance_mode.value === '1') {
-                        console.log('Maintenance mode is ON, redirecting...');
                         window.location.replace('maintenance.html');
-                    } else {
-                        console.log('Maintenance mode is OFF');
                     }
                 }
             } catch (error) {
@@ -42,7 +37,7 @@
                 <img src="images/logo.png" alt="BusinessLoansProfile Logo" width="40" height="40" style="object-fit: contain;">
                 <h2>BusinessLoansProfile</h2>
             </div>
-            <a href="#apply" class="mobile-cta">Get Started →</a>
+            <a href="thinking-about-it.html" class="mobile-cta" aria-label="Thinking about it">?</a>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <span></span>
                 <span></span>
