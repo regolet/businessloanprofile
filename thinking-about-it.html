@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thinking About It - Business Loans</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .thinking-container {
+            max-width: 600px;
+            margin: 100px auto 60px;
+            padding: 40px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .thinking-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .thinking-header h1 {
+            font-size: 2rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .thinking-header p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+        }
+
+        .thinking-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field label {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .form-field label .required {
+            color: #ef4444;
+        }
+
+        .form-field input {
+            padding: 14px 16px;
+            font-size: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .form-field input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.0625rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            display: none;
+            padding: 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            display: none;
+            padding: 16px;
+            background: #ef4444;
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .thinking-container {
+                margin: 80px 20px 40px;
+                padding: 30px 24px;
+            }
+
+            .thinking-header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                    <img src="images/logo.png" alt="BusinessLoansProfile Logo" width="40" height="40" style="object-fit: contain;">
+                    <h2 style="margin: 0;">BusinessLoansProfile</h2>
+                </a>
+            </div>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html#home">Home</a>
+                <a href="index.html#loan-types">Loan Types</a>
+                <a href="index.html#how-it-works">How It Works</a>
+                <a href="index.html#faq">FAQ</a>
+                <a href="thinking-about-it.html" class="nav-cta-secondary">Thinking about it</a>
+                <a href="index.html#apply" class="nav-cta">Get Started →</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Thinking About It Form -->
+    <div class="thinking-container">
+        <div class="thinking-header">
+            <h1>📋 Not Ready Yet?</h1>
+            <p>Let us know when you'll be ready for funding and we'll follow up with you.</p>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            Thank you! We've received your information and will contact you when you're ready.
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            Something went wrong. Please try again.
+        </div>
+
+        <form id="thinkingForm" class="thinking-form">
+            <div class="form-field">
+                <label for="name">Full Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required placeholder="Enter your full name">
+            </div>
+
+            <div class="form-field">
+                <label for="cell">Cell Number <span class="required">*</span></label>
+                <input type="tel" id="cell" name="cell" required placeholder="(555) 123-4567">
+            </div>
+
+            <div class="form-field">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required placeholder="you@company.com">
+            </div>
+
+            <div class="form-field">
+                <label for="ready_date">When will you be ready for funding? <span class="required">*</span></label>
+                <input type="date" id="ready_date" name="ready_date" required>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Information</button>
+        </form>
+
+        <a href="index.html" class="back-link">← Back to Home</a>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const form = document.getElementById('thinkingForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('ready_date').setAttribute('min', today);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value,
+                cell: document.getElementById('cell').value,
+                email: document.getElementById('email').value,
+                ready_date: document.getElementById('ready_date').value
+            };
+
+            try {
+                const response = await fetch('api/thinking-about-it.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    form.style.display = 'none';
+
+                    // Scroll to top to show message
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    throw new Error(result.error || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = error.message || 'Something went wrong. Please try again.';
+
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Information';
+            }
+        });
+    </script>
+</body>
+</html>

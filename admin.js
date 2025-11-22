@@ -125,7 +125,7 @@ async function loadLeads() {
         });
 
         if (response.status === 401) {
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
             return;
         }
 
@@ -786,12 +786,28 @@ function formatDate(dateString) {
 window.onclick = function (event) {
     const leadModal = document.getElementById('leadModal');
     const questionModal = document.getElementById('questionModal');
+    const heroFeatureModal = document.getElementById('heroFeatureModal');
+    const loanTypeModal = document.getElementById('loanTypeModal');
+    const howItWorksModal = document.getElementById('howItWorksModal');
+    const faqModal = document.getElementById('faqModal');
 
     if (event.target === leadModal) {
         closeLeadModal();
     }
     if (event.target === questionModal) {
         closeQuestionModal();
+    }
+    if (event.target === heroFeatureModal) {
+        closeHeroFeatureModal();
+    }
+    if (event.target === loanTypeModal) {
+        closeLoanTypeModal();
+    }
+    if (event.target === howItWorksModal) {
+        closeHowItWorksModal();
+    }
+    if (event.target === faqModal) {
+        closeFAQModal();
     }
 }
 
@@ -820,7 +836,7 @@ async function loadSettings() {
         });
 
         if (response.status === 401) {
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
             return;
         }
 
@@ -838,10 +854,17 @@ async function loadSettings() {
 
 // Display settings in form
 function displaySettings() {
+    console.log('Displaying settings:', siteSettings);
+
     // System settings
     if (siteSettings.system) {
         const maintenanceMode = document.getElementById('maintenance_mode');
-        if (maintenanceMode) maintenanceMode.checked = siteSettings.system.maintenance_mode?.value === '1';
+        const maintenanceValue = siteSettings.system.maintenance_mode?.value;
+        console.log('Maintenance mode value from DB:', maintenanceValue);
+        if (maintenanceMode) {
+            maintenanceMode.checked = maintenanceValue === '1';
+            console.log('Checkbox set to:', maintenanceMode.checked);
+        }
     }
 
     // Company settings
@@ -935,6 +958,9 @@ function setupSettingsForm() {
         const maintenanceCheckbox = document.getElementById('maintenance_mode');
         settings.system.maintenance_mode = maintenanceCheckbox.checked ? '1' : '0';
 
+        console.log('Maintenance checkbox state:', maintenanceCheckbox.checked);
+        console.log('Saving maintenance mode as:', settings.system.maintenance_mode);
+
         // Organize form data by category
         for (let [name, value] of formData.entries()) {
             if (name === 'maintenance_mode') continue; // Skip checkbox, handled above
@@ -954,6 +980,8 @@ function setupSettingsForm() {
         }
 
         try {
+            console.log('Sending settings to API:', settings);
+
             const response = await fetch(`${API_URL}/admin-settings.php`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
@@ -961,10 +989,12 @@ function setupSettingsForm() {
             });
 
             const data = await response.json();
+            console.log('API response:', data);
 
             if (response.ok) {
                 alert('Settings saved successfully!');
-                loadSettings();
+                await loadSettings();
+                console.log('Settings reloaded:', siteSettings);
             } else {
                 alert('Error saving settings: ' + (data.error || 'Unknown error'));
             }
@@ -998,10 +1028,16 @@ function switchSettingsTab(tabName) {
         'features': 'featuresTab',
         'loantypes': 'loantypesTab',
         'howitworks': 'howitworksTab',
-        'faq': 'faqTab'
+        'faq': 'faqTab',
+        'thinking': 'thinkingTab'
     };
 
     document.getElementById(tabContentMap[tabName])?.classList.add('active');
+
+    // Load data when switching to thinking tab
+    if (tabName === 'thinking') {
+        loadThinkingSubmissions();
+    }
 }
 
 // ============= DYNAMIC CONTENT MANAGEMENT =============
@@ -1025,7 +1061,7 @@ async function loadHeroFeatures() {
         });
 
         if (response.status === 401) {
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
             return;
         }
 
@@ -1056,12 +1092,12 @@ function displayHeroFeatures() {
         ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No features added yet. Click "Add Feature" to get started.</p>'
         : '';
 
-    heroFeatures.forEach((feature, index) => {
+    heroFeatures.forEach((feature) => {
         const featureDiv = document.createElement('div');
         featureDiv.className = 'dynamic-item';
         featureDiv.innerHTML = `
             <div class="dynamic-item-header">
-                <h4>Feature ${index + 1}</h4>
+                <h4>${escapeHtml(feature.feature_text)}</h4>
                 <div class="dynamic-item-actions">
                     <button type="button" class="btn-icon" onclick="editHeroFeature(${feature.id})" title="Edit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1079,7 +1115,7 @@ function displayHeroFeatures() {
             </div>
             <div class="form-group">
                 <label>Feature Text</label>
-                <input type="text" value="${feature.feature_text}" id="feature_${feature.id}" disabled>
+                <input type="text" value="${escapeHtml(feature.feature_text)}" id="feature_${feature.id}" disabled>
             </div>
         `;
         container.appendChild(featureDiv);
@@ -1087,35 +1123,80 @@ function displayHeroFeatures() {
 }
 
 function addHeroFeature() {
-    const text = prompt('Enter feature text:');
-    if (!text) return;
-
-    saveHeroFeature({ feature_text: text, order_index: heroFeatures.length + 1 });
+    document.getElementById('heroFeatureModalTitle').textContent = 'Add Hero Feature';
+    document.getElementById('heroFeatureId').value = '';
+    document.getElementById('heroFeatureText').value = '';
+    document.getElementById('heroFeatureOrder').value = heroFeatures.length + 1;
+    document.getElementById('heroFeatureModal').style.display = 'block';
 }
 
 function editHeroFeature(id) {
-    const feature = heroFeatures.find(f => f.id === id);
-    if (!feature) return;
+    console.log('Edit hero feature called with ID:', id, 'Type:', typeof id);
+    console.log('Available features:', heroFeatures);
+    console.log('Available IDs:', heroFeatures.map(f => ({ id: f.id, type: typeof f.id, text: f.feature_text })));
 
-    const newText = prompt('Edit feature text:', feature.feature_text);
-    if (newText === null) return;
+    // Convert id to number to ensure proper comparison
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    console.log('Searching for ID:', numId);
 
-    updateHeroFeature(id, { feature_text: newText, order_index: feature.order_index });
+    // Use loose comparison (==) to handle string/number mismatches
+    const feature = heroFeatures.find(f => f.id == numId);
+    if (!feature) {
+        console.error('Feature not found with ID:', numId);
+        console.error('Available feature IDs:', heroFeatures.map(f => f.id));
+        alert('Error: Feature not found. Please refresh the page and try again.');
+        return;
+    }
+
+    console.log('Found feature:', feature);
+
+    document.getElementById('heroFeatureModalTitle').textContent = 'Edit Hero Feature';
+    document.getElementById('heroFeatureId').value = feature.id;
+    document.getElementById('heroFeatureText').value = feature.feature_text;
+    document.getElementById('heroFeatureOrder').value = feature.order_index;
+    document.getElementById('heroFeatureModal').style.display = 'block';
+
+    console.log('Modal opened for editing');
 }
 
-async function saveHeroFeature(data) {
+function closeHeroFeatureModal() {
+    document.getElementById('heroFeatureModal').style.display = 'none';
+    document.getElementById('heroFeatureForm').reset();
+}
+
+async function saveHeroFeature(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('heroFeatureId').value;
+    const data = {
+        feature_text: document.getElementById('heroFeatureText').value,
+        order_index: parseInt(document.getElementById('heroFeatureOrder').value)
+    };
+
     try {
-        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data)
-        });
+        let response;
+        if (id) {
+            // Update existing
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features&id=${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        } else {
+            // Create new
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=hero_features`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        }
 
         const result = await response.json();
 
         if (response.ok) {
+            closeHeroFeatureModal();
             await loadHeroFeatures();
-            alert('Feature added successfully!');
+            alert(id ? 'Feature updated successfully!' : 'Feature added successfully!');
         } else {
             alert('Error saving feature: ' + (result.error || 'Unknown error'));
         }
@@ -1178,7 +1259,7 @@ async function loadLoanTypes() {
         });
 
         if (response.status === 401) {
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
             return;
         }
 
@@ -1232,9 +1313,11 @@ function displayLoanTypes() {
             }
         }
 
+        const featuredBadge = type.is_featured == 1 ? '<span style="background: var(--primary-color); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">FEATURED</span>' : '';
+
         typeDiv.innerHTML = `
             <div class="dynamic-item-header">
-                <h4>${escapeHtml(type.title)}</h4>
+                <h4>${escapeHtml(type.title)}${featuredBadge}</h4>
                 <div class="dynamic-item-actions">
                     <button type="button" class="btn-icon" onclick="editLoanType(${type.id})" title="Edit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1269,79 +1352,111 @@ function displayLoanTypes() {
 }
 
 function addLoanType() {
-    const title = prompt('Enter loan type title:');
-    if (!title) return;
-
-    const description = prompt('Enter description:');
-    const iconName = prompt('Enter icon name (optional):') || 'file-text';
-    const featuresInput = prompt('Enter features (one per line, separate with | or newline):\n\nExample: Working capital needs|Inventory purchases|Equipment & marketing|Fast approval process');
-
-    let features = [];
-    if (featuresInput) {
-        features = featuresInput.split(/[|\n]/).map(f => f.trim()).filter(f => f.length > 0);
-    }
-
-    saveLoanType({
-        title,
-        description,
-        icon_name: iconName,
-        features: JSON.stringify(features),
-        order_index: loanTypes.length + 1
-    });
+    document.getElementById('loanTypeModalTitle').textContent = 'Add Loan Type';
+    document.getElementById('loanTypeId').value = '';
+    document.getElementById('loanTypeTitle').value = '';
+    document.getElementById('loanTypeDescription').value = '';
+    document.getElementById('loanTypeIcon').value = 'file-text';
+    document.getElementById('loanTypeFeatures').value = '';
+    document.getElementById('loanTypeIsFeatured').checked = false;
+    document.getElementById('loanTypeOrder').value = loanTypes.length + 1;
+    document.getElementById('loanTypeModal').style.display = 'block';
 }
 
 function editLoanType(id) {
-    const type = loanTypes.find(t => t.id === id);
-    if (!type) return;
+    console.log('Edit loan type called with ID:', id, 'Type:', typeof id);
+    console.log('Available loan types:', loanTypes);
+    console.log('Available IDs:', loanTypes.map(t => ({ id: t.id, type: typeof t.id, title: t.title })));
 
-    const title = prompt('Edit loan type title:', type.title);
-    if (title === null) return;
+    // Convert id to number to ensure proper comparison
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    console.log('Searching for ID:', numId);
 
-    const description = prompt('Edit description:', type.description);
-    if (description === null) return;
+    // Use loose comparison (==) to handle string/number mismatches
+    const type = loanTypes.find(t => t.id == numId);
+    if (!type) {
+        console.error('Loan type not found with ID:', numId);
+        console.error('Available loan type IDs:', loanTypes.map(t => t.id));
+        alert('Error: Loan type not found. Please refresh the page and try again.');
+        return;
+    }
 
-    const iconName = prompt('Edit icon name:', type.icon_name);
-    if (iconName === null) return;
+    console.log('Found loan type:', type);
 
     // Parse existing features
     let existingFeatures = [];
     if (type.features) {
         try {
             existingFeatures = JSON.parse(type.features);
+            console.log('Parsed features:', existingFeatures);
         } catch (e) {
             console.error('Error parsing existing features:', e);
         }
     }
 
-    const featuresInput = prompt('Edit features (one per line, separate with | or newline):\n\nExample: Working capital needs|Inventory purchases|Equipment & marketing|Fast approval process', existingFeatures.join('\n'));
+    document.getElementById('loanTypeModalTitle').textContent = 'Edit Loan Type';
+    document.getElementById('loanTypeId').value = type.id;
+    document.getElementById('loanTypeTitle').value = type.title;
+    document.getElementById('loanTypeDescription').value = type.description || '';
+    document.getElementById('loanTypeIcon').value = type.icon_name || 'file-text';
+    document.getElementById('loanTypeFeatures').value = existingFeatures.join('\n');
+    document.getElementById('loanTypeIsFeatured').checked = type.is_featured == 1;
+    document.getElementById('loanTypeOrder').value = type.order_index;
+    document.getElementById('loanTypeModal').style.display = 'block';
 
-    let features = [];
-    if (featuresInput) {
-        features = featuresInput.split(/[|\n]/).map(f => f.trim()).filter(f => f.length > 0);
-    }
-
-    updateLoanType(id, {
-        title,
-        description,
-        icon_name: iconName,
-        features: JSON.stringify(features),
-        order_index: type.order_index
-    });
+    console.log('Modal opened for editing');
 }
 
-async function saveLoanType(data) {
+function closeLoanTypeModal() {
+    document.getElementById('loanTypeModal').style.display = 'none';
+    document.getElementById('loanTypeForm').reset();
+}
+
+async function saveLoanType(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('loanTypeId').value;
+    const featuresText = document.getElementById('loanTypeFeatures').value;
+
+    // Parse features from textarea (one per line)
+    let features = [];
+    if (featuresText.trim()) {
+        features = featuresText.split('\n').map(f => f.trim()).filter(f => f.length > 0);
+    }
+
+    const data = {
+        title: document.getElementById('loanTypeTitle').value,
+        description: document.getElementById('loanTypeDescription').value,
+        icon_name: document.getElementById('loanTypeIcon').value,
+        features: features.length > 0 ? JSON.stringify(features) : null,
+        is_featured: document.getElementById('loanTypeIsFeatured').checked ? 1 : 0,
+        order_index: parseInt(document.getElementById('loanTypeOrder').value)
+    };
+
     try {
-        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data)
-        });
+        let response;
+        if (id) {
+            // Update existing
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types&id=${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        } else {
+            // Create new
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=loan_types`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        }
 
         const result = await response.json();
 
         if (response.ok) {
+            closeLoanTypeModal();
             await loadLoanTypes();
-            alert('Loan type added successfully!');
+            alert(id ? 'Loan type updated successfully!' : 'Loan type added successfully!');
         } else {
             alert('Error saving loan type: ' + (result.error || 'Unknown error'));
         }
@@ -1404,7 +1519,7 @@ async function loadHowItWorksSteps() {
         });
 
         if (response.status === 401) {
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
             return;
         }
 
@@ -1478,62 +1593,89 @@ function displayHowItWorksSteps() {
 }
 
 function addHowItWorksStep() {
-    const stepNumber = prompt('Enter step number:', howItWorksSteps.length + 1);
-    if (!stepNumber) return;
-
-    const title = prompt('Enter step title:');
-    if (!title) return;
-
-    const description = prompt('Enter description:');
-    const imageUrl = prompt('Enter image URL (e.g., from Unsplash, Pexels, or your own hosting):');
-
-    saveHowItWorksStep({
-        step_number: parseInt(stepNumber),
-        title,
-        description,
-        image_url: imageUrl,
-        order_index: howItWorksSteps.length + 1
-    });
+    document.getElementById('howItWorksModalTitle').textContent = 'Add Step';
+    document.getElementById('howItWorksId').value = '';
+    document.getElementById('howItWorksStepNumber').value = howItWorksSteps.length + 1;
+    document.getElementById('howItWorksTitle').value = '';
+    document.getElementById('howItWorksDescription').value = '';
+    document.getElementById('howItWorksImageUrl').value = '';
+    document.getElementById('howItWorksOrder').value = howItWorksSteps.length + 1;
+    document.getElementById('howItWorksModal').style.display = 'block';
 }
 
 function editHowItWorksStep(id) {
-    const step = howItWorksSteps.find(s => s.id === id);
-    if (!step) return;
+    console.log('Edit how it works step called with ID:', id, 'Type:', typeof id);
+    console.log('Available steps:', howItWorksSteps);
+    console.log('Available IDs:', howItWorksSteps.map(s => ({ id: s.id, type: typeof s.id, title: s.title })));
 
-    const stepNumber = prompt('Edit step number:', step.step_number);
-    if (stepNumber === null) return;
+    // Convert id to number to ensure proper comparison
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    console.log('Searching for ID:', numId);
 
-    const title = prompt('Edit title:', step.title);
-    if (title === null) return;
+    // Use loose comparison (==) to handle string/number mismatches
+    const step = howItWorksSteps.find(s => s.id == numId);
+    if (!step) {
+        console.error('Step not found with ID:', numId);
+        console.error('Available step IDs:', howItWorksSteps.map(s => s.id));
+        alert('Error: Step not found. Please refresh the page and try again.');
+        return;
+    }
 
-    const description = prompt('Edit description:', step.description);
-    if (description === null) return;
+    console.log('Found step:', step);
 
-    const imageUrl = prompt('Edit image URL:', step.image_url || '');
-    if (imageUrl === null) return;
+    document.getElementById('howItWorksModalTitle').textContent = 'Edit Step';
+    document.getElementById('howItWorksId').value = step.id;
+    document.getElementById('howItWorksStepNumber').value = step.step_number;
+    document.getElementById('howItWorksTitle').value = step.title;
+    document.getElementById('howItWorksDescription').value = step.description || '';
+    document.getElementById('howItWorksImageUrl').value = step.image_url || '';
+    document.getElementById('howItWorksOrder').value = step.order_index;
+    document.getElementById('howItWorksModal').style.display = 'block';
 
-    updateHowItWorksStep(id, {
-        step_number: parseInt(stepNumber),
-        title,
-        description,
-        image_url: imageUrl,
-        order_index: step.order_index
-    });
+    console.log('Modal opened for editing');
 }
 
-async function saveHowItWorksStep(data) {
+function closeHowItWorksModal() {
+    document.getElementById('howItWorksModal').style.display = 'none';
+    document.getElementById('howItWorksForm').reset();
+}
+
+async function saveHowItWorksStep(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('howItWorksId').value;
+    const data = {
+        step_number: parseInt(document.getElementById('howItWorksStepNumber').value),
+        title: document.getElementById('howItWorksTitle').value,
+        description: document.getElementById('howItWorksDescription').value,
+        image_url: document.getElementById('howItWorksImageUrl').value || null,
+        order_index: parseInt(document.getElementById('howItWorksOrder').value)
+    };
+
     try {
-        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data)
-        });
+        let response;
+        if (id) {
+            // Update existing
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works&id=${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        } else {
+            // Create new
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=how_it_works`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        }
 
         const result = await response.json();
 
         if (response.ok) {
+            closeHowItWorksModal();
             await loadHowItWorksSteps();
-            alert('Step added successfully!');
+            alert(id ? 'Step updated successfully!' : 'Step added successfully!');
         } else {
             alert('Error saving step: ' + (result.error || 'Unknown error'));
         }
@@ -1596,7 +1738,7 @@ async function loadFAQs() {
         });
 
         if (response.status === 401) {
-            window.location.href = 'admin-login.html';
+            window.location.href = 'login.html';
             return;
         }
 
@@ -1662,49 +1804,83 @@ function displayFAQs() {
 }
 
 function addFAQ() {
-    const question = prompt('Enter FAQ question:');
-    if (!question) return;
-
-    const answer = prompt('Enter FAQ answer:');
-    if (!answer) return;
-
-    saveFAQ({
-        question,
-        answer,
-        order_index: faqs.length + 1
-    });
+    document.getElementById('faqModalTitle').textContent = 'Add FAQ';
+    document.getElementById('faqId').value = '';
+    document.getElementById('faqQuestion').value = '';
+    document.getElementById('faqAnswer').value = '';
+    document.getElementById('faqOrder').value = faqs.length + 1;
+    document.getElementById('faqModal').style.display = 'block';
 }
 
 function editFAQ(id) {
-    const faq = faqs.find(f => f.id === id);
-    if (!faq) return;
+    console.log('Edit FAQ called with ID:', id, 'Type:', typeof id);
+    console.log('Available FAQs:', faqs);
+    console.log('Available IDs:', faqs.map(f => ({ id: f.id, type: typeof f.id, question: f.question })));
 
-    const question = prompt('Edit question:', faq.question);
-    if (question === null) return;
+    // Convert id to number to ensure proper comparison
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    console.log('Searching for ID:', numId);
 
-    const answer = prompt('Edit answer:', faq.answer);
-    if (answer === null) return;
+    // Use loose comparison (==) to handle string/number mismatches
+    const faq = faqs.find(f => f.id == numId);
+    if (!faq) {
+        console.error('FAQ not found with ID:', numId);
+        console.error('Available FAQ IDs:', faqs.map(f => f.id));
+        alert('Error: FAQ not found. Please refresh the page and try again.');
+        return;
+    }
 
-    updateFAQ(id, {
-        question,
-        answer,
-        order_index: faq.order_index
-    });
+    console.log('Found FAQ:', faq);
+
+    document.getElementById('faqModalTitle').textContent = 'Edit FAQ';
+    document.getElementById('faqId').value = faq.id;
+    document.getElementById('faqQuestion').value = faq.question;
+    document.getElementById('faqAnswer').value = faq.answer;
+    document.getElementById('faqOrder').value = faq.order_index;
+    document.getElementById('faqModal').style.display = 'block';
+
+    console.log('Modal opened for editing');
 }
 
-async function saveFAQ(data) {
+function closeFAQModal() {
+    document.getElementById('faqModal').style.display = 'none';
+    document.getElementById('faqForm').reset();
+}
+
+async function saveFAQ(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('faqId').value;
+    const data = {
+        question: document.getElementById('faqQuestion').value,
+        answer: document.getElementById('faqAnswer').value,
+        order_index: parseInt(document.getElementById('faqOrder').value)
+    };
+
     try {
-        const response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data)
-        });
+        let response;
+        if (id) {
+            // Update existing
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs&id=${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        } else {
+            // Create new
+            response = await fetch(`${API_URL}/admin-dynamic-content.php?type=faqs`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+        }
 
         const result = await response.json();
 
         if (response.ok) {
+            closeFAQModal();
             await loadFAQs();
-            alert('FAQ added successfully!');
+            alert(id ? 'FAQ updated successfully!' : 'FAQ added successfully!');
         } else {
             alert('Error saving FAQ: ' + (result.error || 'Unknown error'));
         }
@@ -1756,5 +1932,176 @@ async function deleteFAQ(id) {
     } catch (error) {
         console.error('Error deleting FAQ:', error);
         alert('Error deleting FAQ: ' + error.message);
+    }
+}
+
+// ==========================================
+// THINKING ABOUT IT FUNCTIONS
+// ==========================================
+
+let thinkingSubmissions = [];
+
+async function loadThinkingSubmissions() {
+    try {
+        const response = await fetch(`${API_BASE}/thinking-about-it.php`);
+        if (!response.ok) throw new Error('Failed to load submissions');
+
+        thinkingSubmissions = await response.json();
+        console.log('Loaded thinking submissions:', thinkingSubmissions);
+        renderThinkingSubmissions();
+    } catch (error) {
+        console.error('Error loading thinking submissions:', error);
+    }
+}
+
+function renderThinkingSubmissions() {
+    const container = document.getElementById('thinkingSubmissionsList');
+    if (!container) return;
+
+    if (thinkingSubmissions.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 40px;">No submissions yet.</p>';
+        return;
+    }
+
+    container.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+            <thead>
+                <tr style="background: var(--bg-body); border-bottom: 2px solid var(--border-light);">
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-main);">Name</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-main);">Email</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-main);">Cell</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-main);">Ready Date</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-main);">Status</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-main);">Submitted</th>
+                    <th style="padding: 12px; text-align: center; font-weight: 600; color: var(--text-main);">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${thinkingSubmissions.map(submission => `
+                    <tr style="border-bottom: 1px solid var(--border-light);">
+                        <td style="padding: 12px;">${escapeHtml(submission.name)}</td>
+                        <td style="padding: 12px;">${escapeHtml(submission.email)}</td>
+                        <td style="padding: 12px;">${escapeHtml(submission.cell)}</td>
+                        <td style="padding: 12px;">${formatDate(submission.ready_date)}</td>
+                        <td style="padding: 12px;">
+                            <span style="padding: 4px 12px; border-radius: 12px; font-size: 0.875rem; font-weight: 500;
+                                background: ${getStatusColor(submission.status)}20;
+                                color: ${getStatusColor(submission.status)};">
+                                ${submission.status}
+                            </span>
+                        </td>
+                        <td style="padding: 12px; color: var(--text-muted); font-size: 0.875rem;">
+                            ${formatDateTime(submission.created_at)}
+                        </td>
+                        <td style="padding: 12px; text-align: center;">
+                            <button onclick="viewThinkingSubmission(${submission.id})"
+                                    style="background: var(--primary-color); color: white; border: none; padding: 6px 12px;
+                                           border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 0.875rem;">
+                                View
+                            </button>
+                            <button onclick="deleteThinkingSubmission(${submission.id})"
+                                    style="background: #ef4444; color: white; border: none; padding: 6px 12px;
+                                           border-radius: 4px; cursor: pointer; font-size: 0.875rem;">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function getStatusColor(status) {
+    const colors = {
+        'pending': '#f59e0b',
+        'contacted': '#3b82f6',
+        'scheduled': '#8b5cf6',
+        'completed': '#10b981',
+        'cancelled': '#6b7280'
+    };
+    return colors[status] || '#6b7280';
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatDateTime(dateTimeString) {
+    const date = new Date(dateTimeString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function viewThinkingSubmission(id) {
+    const submission = thinkingSubmissions.find(s => s.id == id);
+    if (!submission) {
+        alert('Submission not found');
+        return;
+    }
+
+    document.getElementById('thinkingId').value = submission.id;
+    document.getElementById('thinkingName').value = submission.name;
+    document.getElementById('thinkingCell').value = submission.cell;
+    document.getElementById('thinkingEmail').value = submission.email;
+    document.getElementById('thinkingReadyDate').value = submission.ready_date;
+    document.getElementById('thinkingStatus').value = submission.status;
+    document.getElementById('thinkingNotes').value = submission.notes || '';
+
+    document.getElementById('thinkingModal').style.display = 'block';
+}
+
+function closeThinkingModal() {
+    document.getElementById('thinkingModal').style.display = 'none';
+}
+
+async function saveThinkingSubmission(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('thinkingId').value;
+    const status = document.getElementById('thinkingStatus').value;
+    const notes = document.getElementById('thinkingNotes').value;
+
+    try {
+        const response = await fetch(`${API_BASE}/thinking-about-it.php`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, status, notes })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            await loadThinkingSubmissions();
+            closeThinkingModal();
+            alert('Updated successfully!');
+        } else {
+            alert('Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error updating submission:', error);
+        alert('Error updating submission: ' + error.message);
+    }
+}
+
+async function deleteThinkingSubmission(id) {
+    if (!confirm('Are you sure you want to delete this submission?')) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/thinking-about-it.php?id=${id}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            await loadThinkingSubmissions();
+            alert('Deleted successfully!');
+        } else {
+            alert('Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error deleting submission:', error);
+        alert('Error deleting submission: ' + error.message);
     }
 }

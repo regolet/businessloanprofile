@@ -22,7 +22,12 @@
       "Bash(del nul)",
       "Bash(tree:*)",
       "Bash(php --version:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(php -l:*)",
+      "Bash(php:*)",
+      "Bash(del \"c:\\Users\\admin\\git repo\\businessloanprofile\\admin-login.html\")"
     ],
     "deny": [],
     "ask": []

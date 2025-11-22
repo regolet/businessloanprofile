@@ -151,6 +151,22 @@ h6 {
     color: var(--primary-color);
 }
 
+.nav-cta-secondary {
+    background: white;
+    color: var(--primary-color) !important;
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-weight: 600;
+    border: 2px solid var(--primary-color);
+}
+
+.nav-cta-secondary:hover {
+    background: var(--primary-color);
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
 .nav-cta {
     background: var(--primary-color);
     color: white !important;
@@ -362,27 +378,33 @@ h6 {
 }
 
 .loan-icon {
-    width: 64px;
-    height: 64px;
-    background: rgba(37, 99, 235, 0.1);
-    border-radius: 16px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.loan-icon svg {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    padding: 12px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 12px;
     color: var(--primary-color);
-    margin-bottom: 24px;
     transition: var(--transition);
 }
 
-.loan-card:hover .loan-icon {
+.loan-card:hover .loan-icon svg {
     background: var(--primary-color);
     color: white;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .loan-card h3 {
-    font-size: 1.5rem;
-    margin-bottom: 12px;
+    font-size: 1.375rem;
+    margin: 0;
+    line-height: 1.3;
 }
 
 .loan-card p {
@@ -390,24 +412,29 @@ h6 {
     margin-bottom: 24px;
 }
 
-.loan-card ul {
+.loan-card ul,
+.loan-features {
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.loan-card ul li {
-    padding: 8px 0;
-    padding-left: 24px;
-    position: relative;
+.loan-card ul li,
+.loan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
     color: var(--text-main);
-    font-size: 0.95rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
 }
 
-.loan-card ul li::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: var(--accent-color);
-    font-weight: 700;
+.loan-card ul li svg,
+.loan-features li svg {
+    color: #2563eb;
+    margin-top: 2px;
+    flex-shrink: 0;
 }
 
 /* How It Works */

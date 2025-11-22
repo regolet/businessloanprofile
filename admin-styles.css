@@ -502,29 +502,33 @@ h6 {
 
 /* Form Styles */
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.375rem;
     color: var(--text-main);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 12px 16px;
+    padding: 10px 12px;
     border: 1px solid var(--border-light);
     border-radius: var(--radius-sm);
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-family: inherit;
     transition: var(--transition);
     background: var(--bg-body);
     color: var(--text-main);
+}
+
+.form-group small {
+    font-size: 0.8125rem;
 }
 
 .form-group input:focus,
@@ -911,28 +915,49 @@ h6 {
 /* Settings Section Styles */
 .settings-category {
     background: white;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: var(--radius-md);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     border: 1px solid var(--border-light);
 }
 
 .settings-category h2 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
     border-bottom: 2px solid var(--border-light);
 }
 
 .settings-category h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--primary-color);
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+/* 3-column grid for settings forms - only apply to general settings, not dynamic content tabs */
+.settings-category > .form-group:not(:first-child) {
+    display: inline-block;
+}
+
+/* Only apply auto-grid to settings categories WITHOUT dynamic content lists */
+.settings-category:has(.form-group:nth-child(3)):not(:has(#loanTypesList)):not(:has(#howItWorksStepsList)):not(:has(#heroFeaturesList)):not(:has(#faqList)) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.settings-category:has(.form-group:nth-child(3)):not(:has(#loanTypesList)):not(:has(#howItWorksStepsList)):not(:has(#heroFeaturesList)):not(:has(#faqList)) h2 {
+    grid-column: 1 / -1;
+}
+
+.settings-category:has(.form-group:nth-child(3)):not(:has(#loanTypesList)):not(:has(#howItWorksStepsList)):not(:has(#heroFeaturesList)):not(:has(#faqList)) h3 {
+    grid-column: 1 / -1;
 }
 
 .faq-item-editor {
@@ -1007,13 +1032,29 @@ h6 {
 }
 
 /* Dynamic Item Editor */
+#heroFeaturesList,
+#loanTypesList,
+#howItWorksStepsList,
+#faqsList,
+#faqList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
 .dynamic-item {
-    background: var(--bg-body);
-    padding: 1.5rem;
+    background: white;
+    padding: 1.25rem;
     border-radius: var(--radius-sm);
-    margin-bottom: 1rem;
     border: 1px solid var(--border-light);
     position: relative;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: var(--transition);
+}
+
+.dynamic-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary-light);
 }
 
 .dynamic-item-header {
@@ -1026,10 +1067,13 @@ h6 {
 }
 
 .dynamic-item-header h4 {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text-main);
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .dynamic-item-actions {
@@ -1065,6 +1109,45 @@ h6 {
     height: 16px;
 }
 
+/* Compact form groups inside dynamic items */
+.dynamic-item .form-group {
+    margin-bottom: 0.75rem;
+}
+
+.dynamic-item .form-group label {
+    font-size: 0.8125rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-muted);
+}
+
+.dynamic-item .form-group input,
+.dynamic-item .form-group textarea {
+    padding: 8px 10px;
+    font-size: 0.875rem;
+    background: var(--bg-body);
+}
+
+.dynamic-item .form-group input:disabled,
+.dynamic-item .form-group textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@media (max-width: 1200px) {
+    /* 2 columns on tablets */
+    .settings-category:has(.form-group:nth-child(3)) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #heroFeaturesList,
+    #loanTypesList,
+    #howItWorksStepsList,
+    #faqsList,
+    #faqList {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .settings-tabs {
         flex-wrap: nowrap;
@@ -1075,5 +1158,37 @@ h6 {
     .settings-tab {
         font-size: 0.85rem;
         padding: 0.6rem 1rem;
+    }
+
+    /* Single column on mobile */
+    .settings-category:has(.form-group:nth-child(3)) {
+        grid-template-columns: 1fr;
+    }
+
+    #heroFeaturesList,
+    #loanTypesList,
+    #howItWorksStepsList,
+    #faqsList,
+    #faqList {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-category {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .settings-category h2 {
+        font-size: 1.125rem;
+        margin-bottom: 1rem;
+    }
+
+    .dynamic-item {
+        padding: 1rem;
+    }
+
+    /* Make inline grids single column on mobile */
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
     }
 }

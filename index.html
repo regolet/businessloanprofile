@@ -15,7 +15,7 @@
         // Check maintenance mode synchronously to prevent page flash
         (async function checkMaintenanceMode() {
             try {
-                const response = await fetch('api/admin-settings.php');
+                const response = await fetch('api/public-settings.php');
                 if (response.ok) {
                     const settings = await response.json();
                     console.log('Maintenance mode settings:', settings.system);
@@ -53,6 +53,7 @@
                 <a href="#loan-types">Loan Types</a>
                 <a href="#how-it-works">How It Works</a>
                 <a href="#faq">FAQ</a>
+                <a href="thinking-about-it.html" class="nav-cta-secondary">Thinking about it</a>
                 <a href="#apply" class="nav-cta">Get Started →</a>
             </div>
         </div>
@@ -361,6 +362,7 @@
         </div>
     </footer>
 
+    <script src="dynamic-content-loader.js"></script>
     <script src="animations.js"></script>
     <script src="app.js"></script>
 </body>

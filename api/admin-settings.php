@@ -43,15 +43,18 @@ try {
 
         $conn->beginTransaction();
 
-        $updateStmt = $conn->prepare("
-            UPDATE site_settings
-            SET setting_value = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE category = ? AND setting_key = ?
+        // Use INSERT ... ON DUPLICATE KEY UPDATE to handle both insert and update
+        $upsertStmt = $conn->prepare("
+            INSERT INTO site_settings (category, setting_key, setting_value, setting_type, updated_at)
+            VALUES (?, ?, ?, 'text', CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE
+                setting_value = VALUES(setting_value),
+                updated_at = CURRENT_TIMESTAMP
         ");
 
         foreach ($input['settings'] as $category => $settings) {
             foreach ($settings as $key => $value) {
-                $updateStmt->execute([$value, $category, $key]);
+                $upsertStmt->execute([$category, $key, $value]);
             }
         }
 

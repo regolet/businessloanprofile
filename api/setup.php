@@ -88,16 +88,26 @@ try {
             description TEXT,
             icon_name VARCHAR(50),
             features TEXT,
+            is_featured TINYINT(1) DEFAULT 0,
             order_index INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 
-    // Add features column if it doesn't exist (migration)
-    try {
+    // Check and add features column if it doesn't exist (migration)
+    $featuresExists = $conn->query("SHOW COLUMNS FROM loan_types LIKE 'features'")->fetch();
+    if (!$featuresExists) {
+        echo "<p>Adding 'features' column to loan_types...</p>";
         $conn->exec("ALTER TABLE loan_types ADD COLUMN features TEXT AFTER icon_name");
-    } catch (PDOException $e) {
-        // Column already exists, ignore error
+        echo "<p style='color: green;'>✓ Added 'features' column</p>";
+    }
+
+    // Check and add is_featured column if it doesn't exist (migration)
+    $isFeaturedExists = $conn->query("SHOW COLUMNS FROM loan_types LIKE 'is_featured'")->fetch();
+    if (!$isFeaturedExists) {
+        echo "<p>Adding 'is_featured' column to loan_types...</p>";
+        $conn->exec("ALTER TABLE loan_types ADD COLUMN is_featured TINYINT(1) DEFAULT 0 AFTER features");
+        echo "<p style='color: green;'>✓ Added 'is_featured' column</p>";
     }
 
     // Create how_it_works_steps table (dynamic)
@@ -113,11 +123,12 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 
-    // Add image_url column if it doesn't exist (migration)
-    try {
+    // Check and add image_url column if it doesn't exist (migration)
+    $imageUrlExists = $conn->query("SHOW COLUMNS FROM how_it_works_steps LIKE 'image_url'")->fetch();
+    if (!$imageUrlExists) {
+        echo "<p>Adding 'image_url' column to how_it_works_steps...</p>";
         $conn->exec("ALTER TABLE how_it_works_steps ADD COLUMN image_url VARCHAR(500) AFTER description");
-    } catch (PDOException $e) {
-        // Column already exists, ignore error
+        echo "<p style='color: green;'>✓ Added 'image_url' column</p>";
     }
 
     // Create faqs table (dynamic)
@@ -128,6 +139,21 @@ try {
             answer TEXT NOT NULL,
             order_index INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    // Create thinking_about_it table
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS thinking_about_it (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            cell VARCHAR(50) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            ready_date DATE NOT NULL,
+            status VARCHAR(50) DEFAULT 'pending',
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
 
