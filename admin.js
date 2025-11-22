@@ -10,6 +10,42 @@ let sortColumn = 'created_at';
 let sortDirection = 'desc';
 let searchTerm = '';
 
+// ============================================
+// NOTIFICATION SYSTEM
+// ============================================
+
+function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    const icon = notification.querySelector('.notification-icon');
+    const messageEl = notification.querySelector('.notification-message');
+
+    // Set icon based on type
+    const icons = {
+        success: '✓',
+        error: '✕',
+        info: 'ℹ'
+    };
+
+    icon.textContent = icons[type] || icons.info;
+    messageEl.textContent = message;
+
+    // Remove all type classes
+    notification.classList.remove('success', 'error', 'info');
+
+    // Add current type class
+    notification.classList.add(type);
+
+    // Show notification
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+
+    // Hide after 2 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 2000);
+}
+
 // Check authentication
 function checkAuth() {
     const sessionToken = localStorage.getItem('adminSession');
@@ -471,7 +507,7 @@ async function exportToCSV() {
         downloadFile(csvContent, 'leads-export.csv', 'text/csv');
     } catch (error) {
         console.error('Error exporting to CSV:', error);
-        alert('Error exporting to CSV. Please try again.');
+        showNotification('Error exporting to CSV. Please try again.', 'error');
     } finally {
         // Restore button state
         btn.disabled = false;
@@ -507,7 +543,7 @@ async function exportToJSON() {
         downloadFile(jsonContent, 'leads-export.json', 'application/json');
     } catch (error) {
         console.error('Error exporting to JSON:', error);
-        alert('Error exporting to JSON. Please try again.');
+        showNotification('Error exporting to JSON. Please try again.', 'error');
     } finally {
         // Restore button state
         btn.disabled = false;
@@ -583,7 +619,7 @@ async function viewLead(leadId) {
         modal.style.display = 'block';
     } catch (error) {
         console.error('Error loading lead details:', error);
-        alert('Error loading lead details');
+        showNotification('Error loading lead details', 'error');
     }
 }
 
@@ -690,14 +726,14 @@ async function deleteQuestion(questionId) {
         });
 
         if (response.ok) {
-            alert('Question deleted successfully');
+            showNotification('Question deleted successfully', 'success');
             loadQuestions();
         } else {
-            alert('Error deleting question');
+            showNotification('Error deleting question', 'error');
         }
     } catch (error) {
         console.error('Error deleting question:', error);
-        alert('Error deleting question');
+        showNotification('Error deleting question', 'error');
     }
 }
 
@@ -758,15 +794,15 @@ function setupQuestionForm() {
             }
 
             if (response.ok) {
-                alert('Question saved successfully');
+                showNotification('Question saved successfully', 'success');
                 closeQuestionModal();
                 loadQuestions();
             } else {
-                alert('Error saving question');
+                showNotification('Error saving question', 'error');
             }
         } catch (error) {
             console.error('Error saving question:', error);
-            alert('Error saving question');
+            showNotification('Error saving question', 'error');
         }
     });
 }
@@ -992,15 +1028,15 @@ function setupSettingsForm() {
             console.log('API response:', data);
 
             if (response.ok) {
-                alert('Settings saved successfully!');
+                showNotification('Settings saved successfully!', 'success');
                 await loadSettings();
                 console.log('Settings reloaded:', siteSettings);
             } else {
-                alert('Error saving settings: ' + (data.error || 'Unknown error'));
+                showNotification('Error saving settings: ' + (data.error || 'Unknown error'), 'error');
             }
         } catch (error) {
             console.error('Error saving settings:', error);
-            alert('Error saving settings. Please try again.');
+            showNotification('Error saving settings. Please try again.', 'error');
         }
     });
 }
@@ -1144,7 +1180,7 @@ function editHeroFeature(id) {
     if (!feature) {
         console.error('Feature not found with ID:', numId);
         console.error('Available feature IDs:', heroFeatures.map(f => f.id));
-        alert('Error: Feature not found. Please refresh the page and try again.');
+        showNotification('Error: Feature not found. Please refresh the page and try again.', 'error');
         return;
     }
 
@@ -1196,13 +1232,13 @@ async function saveHeroFeature(event) {
         if (response.ok) {
             closeHeroFeatureModal();
             await loadHeroFeatures();
-            alert(id ? 'Feature updated successfully!' : 'Feature added successfully!');
+            showNotification(id ? 'Feature updated successfully!' : 'Feature added successfully!', 'success');
         } else {
-            alert('Error saving feature: ' + (result.error || 'Unknown error'));
+            showNotification('Error saving feature: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error saving feature:', error);
-        alert('Error saving feature: ' + error.message);
+        showNotification('Error saving feature: ' + error.message, 'error');
     }
 }
 
@@ -1218,13 +1254,13 @@ async function updateHeroFeature(id, data) {
 
         if (response.ok) {
             await loadHeroFeatures();
-            alert('Feature updated successfully!');
+            showNotification('Feature updated successfully!', 'success');
         } else {
-            alert('Error updating feature: ' + (result.error || 'Unknown error'));
+            showNotification('Error updating feature: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error updating feature:', error);
-        alert('Error updating feature: ' + error.message);
+        showNotification('Error updating feature: ' + error.message, 'error');
     }
 }
 
@@ -1241,13 +1277,13 @@ async function deleteHeroFeature(id) {
 
         if (response.ok) {
             await loadHeroFeatures();
-            alert('Feature deleted successfully!');
+            showNotification('Feature deleted successfully!', 'success');
         } else {
-            alert('Error deleting feature: ' + (result.error || 'Unknown error'));
+            showNotification('Error deleting feature: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error deleting feature:', error);
-        alert('Error deleting feature: ' + error.message);
+        showNotification('Error deleting feature: ' + error.message, 'error');
     }
 }
 
@@ -1377,7 +1413,7 @@ function editLoanType(id) {
     if (!type) {
         console.error('Loan type not found with ID:', numId);
         console.error('Available loan type IDs:', loanTypes.map(t => t.id));
-        alert('Error: Loan type not found. Please refresh the page and try again.');
+        showNotification('Error: Loan type not found. Please refresh the page and try again.', 'error');
         return;
     }
 
@@ -1456,13 +1492,13 @@ async function saveLoanType(event) {
         if (response.ok) {
             closeLoanTypeModal();
             await loadLoanTypes();
-            alert(id ? 'Loan type updated successfully!' : 'Loan type added successfully!');
+            showNotification(id ? 'Loan type updated successfully!' : 'Loan type added successfully!', 'success');
         } else {
-            alert('Error saving loan type: ' + (result.error || 'Unknown error'));
+            showNotification('Error saving loan type: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error saving loan type:', error);
-        alert('Error saving loan type: ' + error.message);
+        showNotification('Error saving loan type: ' + error.message, 'error');
     }
 }
 
@@ -1478,13 +1514,13 @@ async function updateLoanType(id, data) {
 
         if (response.ok) {
             await loadLoanTypes();
-            alert('Loan type updated successfully!');
+            showNotification('Loan type updated successfully!', 'success');
         } else {
-            alert('Error updating loan type: ' + (result.error || 'Unknown error'));
+            showNotification('Error updating loan type: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error updating loan type:', error);
-        alert('Error updating loan type: ' + error.message);
+        showNotification('Error updating loan type: ' + error.message, 'error');
     }
 }
 
@@ -1501,13 +1537,13 @@ async function deleteLoanType(id) {
 
         if (response.ok) {
             await loadLoanTypes();
-            alert('Loan type deleted successfully!');
+            showNotification('Loan type deleted successfully!', 'success');
         } else {
-            alert('Error deleting loan type: ' + (result.error || 'Unknown error'));
+            showNotification('Error deleting loan type: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error deleting loan type:', error);
-        alert('Error deleting loan type: ' + error.message);
+        showNotification('Error deleting loan type: ' + error.message, 'error');
     }
 }
 
@@ -1617,7 +1653,7 @@ function editHowItWorksStep(id) {
     if (!step) {
         console.error('Step not found with ID:', numId);
         console.error('Available step IDs:', howItWorksSteps.map(s => s.id));
-        alert('Error: Step not found. Please refresh the page and try again.');
+        showNotification('Error: Step not found. Please refresh the page and try again.', 'error');
         return;
     }
 
@@ -1675,13 +1711,13 @@ async function saveHowItWorksStep(event) {
         if (response.ok) {
             closeHowItWorksModal();
             await loadHowItWorksSteps();
-            alert(id ? 'Step updated successfully!' : 'Step added successfully!');
+            showNotification(id ? 'Step updated successfully!' : 'Step added successfully!', 'success');
         } else {
-            alert('Error saving step: ' + (result.error || 'Unknown error'));
+            showNotification('Error saving step: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving step:', error);
-        alert('Error saving step: ' + error.message);
+        showNotification('Error saving step: ' + error.message, 'error');
     }
 }
 
@@ -1697,13 +1733,13 @@ async function updateHowItWorksStep(id, data) {
 
         if (response.ok) {
             await loadHowItWorksSteps();
-            alert('Step updated successfully!');
+            showNotification('Step updated successfully!', 'success');
         } else {
-            alert('Error updating step: ' + (result.error || 'Unknown error'));
+            showNotification('Error updating step: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error updating step:', error);
-        alert('Error updating step: ' + error.message);
+        showNotification('Error updating step: ' + error.message, 'error');
     }
 }
 
@@ -1720,13 +1756,13 @@ async function deleteHowItWorksStep(id) {
 
         if (response.ok) {
             await loadHowItWorksSteps();
-            alert('Step deleted successfully!');
+            showNotification('Step deleted successfully!', 'success');
         } else {
-            alert('Error deleting step: ' + (result.error || 'Unknown error'));
+            showNotification('Error deleting step: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error deleting step:', error);
-        alert('Error deleting step: ' + error.message);
+        showNotification('Error deleting step: ' + error.message, 'error');
     }
 }
 
@@ -1826,7 +1862,7 @@ function editFAQ(id) {
     if (!faq) {
         console.error('FAQ not found with ID:', numId);
         console.error('Available FAQ IDs:', faqs.map(f => f.id));
-        alert('Error: FAQ not found. Please refresh the page and try again.');
+        showNotification('Error: FAQ not found. Please refresh the page and try again.', 'error');
         return;
     }
 
@@ -1880,13 +1916,13 @@ async function saveFAQ(event) {
         if (response.ok) {
             closeFAQModal();
             await loadFAQs();
-            alert(id ? 'FAQ updated successfully!' : 'FAQ added successfully!');
+            showNotification(id ? 'FAQ updated successfully!' : 'FAQ added successfully!', 'success');
         } else {
-            alert('Error saving FAQ: ' + (result.error || 'Unknown error'));
+            showNotification('Error saving FAQ: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving FAQ:', error);
-        alert('Error saving FAQ: ' + error.message);
+        showNotification('Error saving FAQ: ' + error.message, 'error');
     }
 }
 
@@ -1902,13 +1938,13 @@ async function updateFAQ(id, data) {
 
         if (response.ok) {
             await loadFAQs();
-            alert('FAQ updated successfully!');
+            showNotification('FAQ updated successfully!', 'success');
         } else {
-            alert('Error updating FAQ: ' + (result.error || 'Unknown error'));
+            showNotification('Error updating FAQ: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error updating FAQ:', error);
-        alert('Error updating FAQ: ' + error.message);
+        showNotification('Error updating FAQ: ' + error.message, 'error');
     }
 }
 
@@ -1925,13 +1961,13 @@ async function deleteFAQ(id) {
 
         if (response.ok) {
             await loadFAQs();
-            alert('FAQ deleted successfully!');
+            showNotification('FAQ deleted successfully!', 'success');
         } else {
-            alert('Error deleting FAQ: ' + (result.error || 'Unknown error'));
+            showNotification('Error deleting FAQ: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error deleting FAQ:', error);
-        alert('Error deleting FAQ: ' + error.message);
+        showNotification('Error deleting FAQ: ' + error.message, 'error');
     }
 }
 
@@ -2036,7 +2072,7 @@ function formatDateTime(dateTimeString) {
 function viewThinkingSubmission(id) {
     const submission = thinkingSubmissions.find(s => s.id == id);
     if (!submission) {
-        alert('Submission not found');
+        showNotification('Submission not found', 'error');
         return;
     }
 
@@ -2074,13 +2110,13 @@ async function saveThinkingSubmission(event) {
         if (response.ok) {
             await loadThinkingSubmissions();
             closeThinkingModal();
-            alert('Updated successfully!');
+            showNotification('Updated successfully!', 'success');
         } else {
-            alert('Error: ' + (result.error || 'Unknown error'));
+            showNotification('Error: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error updating submission:', error);
-        alert('Error updating submission: ' + error.message);
+        showNotification('Error updating submission: ' + error.message, 'error');
     }
 }
 
@@ -2096,12 +2132,12 @@ async function deleteThinkingSubmission(id) {
 
         if (response.ok) {
             await loadThinkingSubmissions();
-            alert('Deleted successfully!');
+            showNotification('Deleted successfully!', 'success');
         } else {
-            alert('Error: ' + (result.error || 'Unknown error'));
+            showNotification('Error: ' + (result.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error deleting submission:', error);
-        alert('Error deleting submission: ' + error.message);
+        showNotification('Error deleting submission: ' + error.message, 'error');
     }
 }
