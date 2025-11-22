@@ -162,13 +162,16 @@ function populateLoanTypesSection(settings, loanTypes) {
         return;
     }
 
+    console.log('Populating loan types, count:', loanTypes.length);
+
+    // Clear existing cards (always clear hardcoded HTML)
+    container.innerHTML = '';
+
     if (loanTypes.length === 0) {
-        console.log('No loan types to display');
+        console.log('No loan types in database - showing empty message');
+        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #64748b;">No loan types configured yet. Please add them in the admin panel.</p>';
         return;
     }
-
-    // Clear existing cards (keep only dynamic ones)
-    container.innerHTML = '';
 
     // Sort by order_index
     const sortedTypes = loanTypes.sort((a, b) => a.order_index - b.order_index);
