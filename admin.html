@@ -50,6 +50,15 @@
                     </svg>
                     <span>Leads</span>
                 </a>
+                <a href="#" class="nav-item" onclick="showSection('thinking')">
+                    <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span>Thinking About It</span>
+                </a>
                 <a href="#" class="nav-item" onclick="showSection('questions')">
                     <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
@@ -294,6 +303,33 @@
                             <option value="100">100</option>
                         </select>
                     </div>
+                </div>
+            </section>
+
+            <!-- Thinking About It Section -->
+            <section id="thinkingSection" class="content-section" style="display: none;">
+                <div class="section-header">
+                    <h1>Thinking About It Submissions</h1>
+                    <p style="color: var(--text-muted); margin-top: 8px;">Manage inquiries from prospects who aren't ready yet but want to be contacted later.</p>
+                </div>
+
+                <div class="filters-bar" style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <select id="thinkingStatusFilter" onchange="filterThinkingSubmissions()" style="padding: 10px 16px; border: 2px solid var(--border-light); border-radius: 8px; font-size: 0.9375rem;">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+
+                    <input type="text" id="thinkingSearchInput" placeholder="Search by name, email, or phone..."
+                           onkeyup="filterThinkingSubmissions()"
+                           style="flex: 1; min-width: 250px; padding: 10px 16px; border: 2px solid var(--border-light); border-radius: 8px; font-size: 0.9375rem;">
+                </div>
+
+                <div id="thinkingLeadsList">
+                    <!-- Submissions will be loaded here -->
                 </div>
             </section>
 

@@ -125,18 +125,29 @@ function showSection(section) {
     // Show/hide sections
     if (section === 'leads') {
         document.getElementById('leadsSection').style.display = 'block';
+        document.getElementById('thinkingSection').style.display = 'none';
         document.getElementById('questionsSection').style.display = 'none';
         document.getElementById('settingsSection').style.display = 'none';
         document.getElementById('sectionTitle').textContent = 'Leads Management';
         document.getElementById('addNewBtn').style.display = 'none';
+    } else if (section === 'thinking') {
+        document.getElementById('leadsSection').style.display = 'none';
+        document.getElementById('thinkingSection').style.display = 'block';
+        document.getElementById('questionsSection').style.display = 'none';
+        document.getElementById('settingsSection').style.display = 'none';
+        document.getElementById('sectionTitle').textContent = 'Thinking About It';
+        document.getElementById('addNewBtn').style.display = 'none';
+        loadThinkingLeads();
     } else if (section === 'questions') {
         document.getElementById('leadsSection').style.display = 'none';
+        document.getElementById('thinkingSection').style.display = 'none';
         document.getElementById('questionsSection').style.display = 'block';
         document.getElementById('settingsSection').style.display = 'none';
         document.getElementById('sectionTitle').textContent = 'Questions Management';
         document.getElementById('addNewBtn').style.display = 'block';
     } else if (section === 'settings') {
         document.getElementById('leadsSection').style.display = 'none';
+        document.getElementById('thinkingSection').style.display = 'none';
         document.getElementById('questionsSection').style.display = 'none';
         document.getElementById('settingsSection').style.display = 'block';
         document.getElementById('sectionTitle').textContent = 'Site Settings';
@@ -2139,5 +2150,156 @@ async function deleteThinkingSubmission(id) {
     } catch (error) {
         console.error('Error deleting submission:', error);
         showNotification('Error deleting submission: ' + error.message, 'error');
+    }
+}
+
+// ==========================================
+// THINKING ABOUT IT - LEADS SECTION
+// ==========================================
+
+let allThinkingLeads = [];
+let filteredThinkingLeads = [];
+
+async function loadThinkingLeads() {
+    try {
+        const response = await fetch(`${API_URL}/thinking-about-it.php`);
+        if (!response.ok) throw new Error('Failed to load submissions');
+
+        allThinkingLeads = await response.json();
+        filteredThinkingLeads = [...allThinkingLeads];
+        console.log('Loaded thinking leads:', allThinkingLeads);
+        renderThinkingLeads();
+    } catch (error) {
+        console.error('Error loading thinking leads:', error);
+        document.getElementById('thinkingLeadsList').innerHTML =
+            '<p style="text-align: center; color: var(--text-muted); padding: 40px;">Error loading submissions. Please try again.</p>';
+    }
+}
+
+function filterThinkingSubmissions() {
+    const statusFilter = document.getElementById('thinkingStatusFilter').value;
+    const searchTerm = document.getElementById('thinkingSearchInput').value.toLowerCase();
+
+    filteredThinkingLeads = allThinkingLeads.filter(lead => {
+        const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
+        const matchesSearch = !searchTerm ||
+            lead.name.toLowerCase().includes(searchTerm) ||
+            lead.email.toLowerCase().includes(searchTerm) ||
+            lead.cell.toLowerCase().includes(searchTerm);
+
+        return matchesStatus && matchesSearch;
+    });
+
+    renderThinkingLeads();
+}
+
+function renderThinkingLeads() {
+    const container = document.getElementById('thinkingLeadsList');
+    if (!container) return;
+
+    if (filteredThinkingLeads.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 40px;">No submissions found.</p>';
+        return;
+    }
+
+    container.innerHTML = `
+        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: var(--bg-body); border-bottom: 2px solid var(--border-light);">
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Name</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Email</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Phone</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Ready Date</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Status</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Submitted</th>
+                        <th style="padding: 16px; text-align: center; font-weight: 600; color: var(--text-main);">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filteredThinkingLeads.map(lead => `
+                        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;"
+                            onmouseover="this.style.background='var(--bg-body)'"
+                            onmouseout="this.style.background='white'">
+                            <td style="padding: 16px; font-weight: 500;">${escapeHtml(lead.name)}</td>
+                            <td style="padding: 16px; color: var(--text-muted);">${escapeHtml(lead.email)}</td>
+                            <td style="padding: 16px; color: var(--text-muted);">${escapeHtml(lead.cell)}</td>
+                            <td style="padding: 16px;">
+                                <span style="font-weight: 500; color: var(--text-main);">${formatDate(lead.ready_date)}</span>
+                            </td>
+                            <td style="padding: 16px;">
+                                <span style="padding: 6px 14px; border-radius: 20px; font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+                                    background: ${getStatusColor(lead.status)}20;
+                                    color: ${getStatusColor(lead.status)};">
+                                    ${lead.status}
+                                </span>
+                            </td>
+                            <td style="padding: 16px; color: var(--text-muted); font-size: 0.875rem;">
+                                ${formatDateTime(lead.created_at)}
+                            </td>
+                            <td style="padding: 16px; text-align: center;">
+                                <button onclick="viewThinkingLead(${lead.id})"
+                                        style="background: var(--primary-color); color: white; border: none; padding: 8px 16px;
+                                               border-radius: 6px; cursor: pointer; margin-right: 6px; font-size: 0.875rem; font-weight: 500; transition: all 0.2s;"
+                                        onmouseover="this.style.opacity='0.9'"
+                                        onmouseout="this.style.opacity='1'">
+                                    View
+                                </button>
+                                <button onclick="deleteThinkingLead(${lead.id})"
+                                        style="background: #ef4444; color: white; border: none; padding: 8px 16px;
+                                               border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s;"
+                                        onmouseover="this.style.opacity='0.9'"
+                                        onmouseout="this.style.opacity='1'">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 16px; color: var(--text-muted); font-size: 0.875rem;">
+            Showing ${filteredThinkingLeads.length} of ${allThinkingLeads.length} submissions
+        </div>
+    `;
+}
+
+function viewThinkingLead(id) {
+    const lead = allThinkingLeads.find(l => l.id == id);
+    if (!lead) {
+        showNotification('Lead not found', 'error');
+        return;
+    }
+
+    document.getElementById('thinkingId').value = lead.id;
+    document.getElementById('thinkingName').value = lead.name;
+    document.getElementById('thinkingCell').value = lead.cell;
+    document.getElementById('thinkingEmail').value = lead.email;
+    document.getElementById('thinkingReadyDate').value = lead.ready_date;
+    document.getElementById('thinkingStatus').value = lead.status;
+    document.getElementById('thinkingNotes').value = lead.notes || '';
+
+    document.getElementById('thinkingModal').style.display = 'block';
+}
+
+async function deleteThinkingLead(id) {
+    if (!confirm('Are you sure you want to delete this submission?')) return;
+
+    try {
+        const response = await fetch(`${API_URL}/thinking-about-it.php?id=${id}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            await loadThinkingLeads();
+            showNotification('Deleted successfully!', 'success');
+        } else {
+            showNotification('Error: ' + (result.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting lead:', error);
+        showNotification('Error deleting lead: ' + error.message, 'error');
     }
 }
