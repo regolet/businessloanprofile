@@ -17,18 +17,6 @@ define('SESSION_LIFETIME', 86400);  // 24 hours in seconds
 // Timezone
 date_default_timezone_set('UTC');
 
-// CORS headers
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json');
-
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
 // Database connection function
 function getDbConnection() {
     try {
@@ -50,8 +38,12 @@ function getDbConnection() {
     }
 }
 
-// Start session
-session_start();
+// Function to start session (only when needed)
+function startSession() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+}
 
 // Function to generate secure token
 function generateToken() {
@@ -60,6 +52,8 @@ function generateToken() {
 
 // Function to verify admin session
 function verifySession() {
+    startSession(); // Start session only when needed
+
     if (!isset($_SESSION['admin_token']) || !isset($_SESSION['admin_username'])) {
         http_response_code(401);
         echo json_encode(['error' => 'Unauthorized']);
