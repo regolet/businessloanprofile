@@ -350,6 +350,7 @@
                     <button class="settings-tab" onclick="switchSettingsTab('loantypes')">Loan Types</button>
                     <button class="settings-tab" onclick="switchSettingsTab('howitworks')">How It Works</button>
                     <button class="settings-tab" onclick="switchSettingsTab('faq')">FAQ</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('footer')">Footer</button>
                     <button class="settings-tab" onclick="switchSettingsTab('thinking')">Thinking About It</button>
                 </div>
 
@@ -555,6 +556,27 @@
 
                             <div id="faqList">
                                 <!-- Dynamic FAQs will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Tab -->
+                    <div id="footerTab" class="settings-tab-content">
+                        <div class="settings-category">
+                            <h2>Footer Settings</h2>
+                            <div class="form-group">
+                                <label>Copyright Text</label>
+                                <input type="text" id="footer_copyright_text" name="footer_copyright_text" placeholder="© 2024 BusinessLoansProfile. All rights reserved.">
+                                <small style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+                                    Text displayed at the bottom of the footer
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label>Footer Tagline</label>
+                                <input type="text" id="footer_tagline" name="footer_tagline" placeholder="Empowering businesses with fast, flexible financing solutions.">
+                                <small style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+                                    Brief description shown in the footer
+                                </small>
                             </div>
                         </div>
                     </div>

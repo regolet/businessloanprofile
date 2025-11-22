@@ -989,6 +989,15 @@ function displaySettings() {
             if (answerEl) answerEl.value = siteSettings.faq[`faq${i}_answer`]?.value || '';
         }
     }
+
+    // Footer
+    if (siteSettings.footer) {
+        const footerCopyright = document.getElementById('footer_copyright_text');
+        const footerTagline = document.getElementById('footer_tagline');
+
+        if (footerCopyright) footerCopyright.value = siteSettings.footer.copyright_text?.value || '';
+        if (footerTagline) footerTagline.value = siteSettings.footer.tagline?.value || '';
+    }
 }
 
 // Setup settings form submission

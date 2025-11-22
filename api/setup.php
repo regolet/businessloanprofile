@@ -284,6 +284,10 @@ try {
             ['faq', 'faq3_answer', 'Funding speed varies by lender and loan type. Many of our partners offer funding within 24 hours of approval, though some products may take longer.', 'textarea'],
             ['faq', 'faq4_question', 'What do I need to qualify?', 'text'],
             ['faq', 'faq4_answer', 'Requirements vary by loan type and lender. Generally, you\'ll need to be in business for a minimum period and meet certain revenue thresholds. Our network includes options for various credit profiles.', 'textarea'],
+
+            // Footer Settings
+            ['footer', 'copyright_text', '© 2024 BusinessLoansProfile. All rights reserved.', 'text'],
+            ['footer', 'tagline', 'Empowering businesses with fast, flexible financing solutions.', 'text'],
         ];
 
         $settingStmt = $conn->prepare("INSERT INTO site_settings (category, setting_key, setting_value, setting_type) VALUES (?, ?, ?, ?)");

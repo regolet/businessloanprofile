@@ -27,6 +27,7 @@ async function loadAllDynamicContent() {
             populateHeroSection(settings);
             populateLoanTypesSection(settings, loanTypes);
             populateHowItWorksSection(settings, howItWorksSteps);
+            populateFooter(settings);
         }
 
         if (heroFeatures) populateHeroFeatures(heroFeatures);
@@ -351,6 +352,28 @@ function getIconPath(iconName) {
         'users': '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'
     };
     return icons[iconName] || icons['file-text'];
+}
+
+// Populate Footer
+function populateFooter(settings) {
+    const companyName = settings.company?.name || 'BusinessLoansProfile';
+    const taglineText = settings.footer?.tagline || 'Empowering businesses with fast, flexible financing solutions.';
+    const copyrightText = settings.footer?.copyright_text || '© 2024 BusinessLoansProfile. All rights reserved.';
+    const companyEmail = settings.company?.email || 'info@businessloans.com';
+    const companyPhone = settings.company?.phone || '1-800-BUSINESS';
+
+    // Update footer elements
+    const footerCompanyName = document.getElementById('footer-company-name');
+    const footerTagline = document.getElementById('footer-tagline');
+    const footerCopyright = document.getElementById('footer-copyright');
+    const footerEmail = document.getElementById('footer-email');
+    const footerPhone = document.getElementById('footer-phone');
+
+    if (footerCompanyName) footerCompanyName.textContent = `💼 ${companyName}`;
+    if (footerTagline) footerTagline.textContent = taglineText;
+    if (footerCopyright) footerCopyright.textContent = copyrightText;
+    if (footerEmail) footerEmail.textContent = companyEmail;
+    if (footerPhone) footerPhone.textContent = companyPhone;
 }
 
 // Helper function to escape HTML
