@@ -60,6 +60,9 @@ function checkAuth() {
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('adminSession');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userEmail');
         window.location.href = 'login.html';
     }
 }
@@ -106,6 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = checkAuth();
     if (!token) return;
 
+    // Check super admin access and show/hide menu
+    checkSuperAdminAccess();
+
+    // Display logged in user info
+    displayLoggedInUser();
+
     loadLeads();
     loadQuestions();
     loadSettings();
@@ -122,36 +131,37 @@ function showSection(section) {
     });
     event.target.closest('.nav-item').classList.add('active');
 
-    // Show/hide sections
+    // Hide all sections
+    document.getElementById('leadsSection').style.display = 'none';
+    document.getElementById('thinkingSection').style.display = 'none';
+    document.getElementById('questionsSection').style.display = 'none';
+    document.getElementById('settingsSection').style.display = 'none';
+    const accountsSection = document.getElementById('accountsSection');
+    if (accountsSection) accountsSection.style.display = 'none';
+
+    // Show selected section and update title
     if (section === 'leads') {
         document.getElementById('leadsSection').style.display = 'block';
-        document.getElementById('thinkingSection').style.display = 'none';
-        document.getElementById('questionsSection').style.display = 'none';
-        document.getElementById('settingsSection').style.display = 'none';
         document.getElementById('sectionTitle').textContent = 'Leads Management';
         document.getElementById('addNewBtn').style.display = 'none';
     } else if (section === 'thinking') {
-        document.getElementById('leadsSection').style.display = 'none';
         document.getElementById('thinkingSection').style.display = 'block';
-        document.getElementById('questionsSection').style.display = 'none';
-        document.getElementById('settingsSection').style.display = 'none';
-        document.getElementById('sectionTitle').textContent = 'Thinking About It';
+        document.getElementById('sectionTitle').textContent = 'Schedule Your Funding';
         document.getElementById('addNewBtn').style.display = 'none';
         loadThinkingLeads();
     } else if (section === 'questions') {
-        document.getElementById('leadsSection').style.display = 'none';
-        document.getElementById('thinkingSection').style.display = 'none';
         document.getElementById('questionsSection').style.display = 'block';
-        document.getElementById('settingsSection').style.display = 'none';
         document.getElementById('sectionTitle').textContent = 'Questions Management';
         document.getElementById('addNewBtn').style.display = 'block';
     } else if (section === 'settings') {
-        document.getElementById('leadsSection').style.display = 'none';
-        document.getElementById('thinkingSection').style.display = 'none';
-        document.getElementById('questionsSection').style.display = 'none';
         document.getElementById('settingsSection').style.display = 'block';
         document.getElementById('sectionTitle').textContent = 'Page Settings';
         document.getElementById('addNewBtn').style.display = 'none';
+    } else if (section === 'accounts') {
+        if (accountsSection) accountsSection.style.display = 'block';
+        document.getElementById('sectionTitle').textContent = 'Account Management';
+        document.getElementById('addNewBtn').style.display = 'none';
+        loadAccounts();
     }
 }
 
@@ -991,12 +1001,21 @@ function displaySettings() {
     }
 
     // Footer
+    console.log('Loading footer settings:', siteSettings.footer);
     if (siteSettings.footer) {
         const footerCopyright = document.getElementById('footer_copyright_text');
         const footerTagline = document.getElementById('footer_tagline');
 
+        console.log('Footer elements:', { footerCopyright, footerTagline });
+        console.log('Footer data:', {
+            copyright: siteSettings.footer.copyright_text,
+            tagline: siteSettings.footer.tagline
+        });
+
         if (footerCopyright) footerCopyright.value = siteSettings.footer.copyright_text?.value || '';
         if (footerTagline) footerTagline.value = siteSettings.footer.tagline?.value || '';
+    } else {
+        console.warn('No footer settings found in siteSettings');
     }
 }
 
@@ -1015,7 +1034,8 @@ function setupSettingsForm() {
             hero_features: {},
             loan_types: {},
             how_it_works: {},
-            faq: {}
+            faq: {},
+            footer: {}
         };
 
         // Handle maintenance mode checkbox separately
@@ -1193,6 +1213,7 @@ function switchSettingsTab(tabName) {
         'loantypes': 'loantypesTab',
         'howitworks': 'howitworksTab',
         'faq': 'faqTab',
+        'footer': 'footerTab',
         'thinking': 'thinkingTab'
     };
 
@@ -2333,17 +2354,17 @@ function renderThinkingLeads() {
     }
 
     container.innerHTML = `
-        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-            <table style="width: 100%; border-collapse: collapse;">
+        <div class="table-container" style="background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <table class="data-table" style="width: 100%; border-collapse: collapse; min-width: 900px;">
                 <thead>
                     <tr style="background: var(--bg-body); border-bottom: 2px solid var(--border-light);">
-                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Name</th>
-                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Email</th>
-                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Phone</th>
-                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Ready Date</th>
-                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Status</th>
-                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main);">Submitted</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; color: var(--text-main);">Actions</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main); white-space: nowrap;">Name</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main); white-space: nowrap;">Email</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main); white-space: nowrap;">Phone</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main); white-space: nowrap;">Ready Date</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main); white-space: nowrap;">Status</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600; color: var(--text-main); white-space: nowrap;">Submitted</th>
+                        <th style="padding: 16px; text-align: center; font-weight: 600; color: var(--text-main); white-space: nowrap;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -2351,23 +2372,23 @@ function renderThinkingLeads() {
                         <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;"
                             onmouseover="this.style.background='var(--bg-body)'"
                             onmouseout="this.style.background='white'">
-                            <td style="padding: 16px; font-weight: 500;">${escapeHtml(lead.name)}</td>
-                            <td style="padding: 16px; color: var(--text-muted);">${escapeHtml(lead.email)}</td>
-                            <td style="padding: 16px; color: var(--text-muted);">${escapeHtml(lead.cell)}</td>
-                            <td style="padding: 16px;">
+                            <td style="padding: 16px; font-weight: 500; white-space: nowrap;">${escapeHtml(lead.name)}</td>
+                            <td style="padding: 16px; color: var(--text-muted); white-space: nowrap;">${escapeHtml(lead.email)}</td>
+                            <td style="padding: 16px; color: var(--text-muted); white-space: nowrap;">${escapeHtml(lead.cell)}</td>
+                            <td style="padding: 16px; white-space: nowrap;">
                                 <span style="font-weight: 500; color: var(--text-main);">${formatDate(lead.ready_date)}</span>
                             </td>
-                            <td style="padding: 16px;">
+                            <td style="padding: 16px; white-space: nowrap;">
                                 <span style="padding: 6px 14px; border-radius: 20px; font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
                                     background: ${getStatusColor(lead.status)}20;
                                     color: ${getStatusColor(lead.status)};">
                                     ${lead.status}
                                 </span>
                             </td>
-                            <td style="padding: 16px; color: var(--text-muted); font-size: 0.875rem;">
+                            <td style="padding: 16px; color: var(--text-muted); font-size: 0.875rem; white-space: nowrap;">
                                 ${formatDateTime(lead.created_at)}
                             </td>
-                            <td style="padding: 16px; text-align: center;">
+                            <td style="padding: 16px; text-align: center; white-space: nowrap;">
                                 <button onclick="viewThinkingLead(${lead.id})" title="View"
                                         style="background: var(--primary-color); color: white; border: none; padding: 8px;
                                                border-radius: 6px; cursor: pointer; margin-right: 6px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;"
@@ -2437,5 +2458,282 @@ async function deleteThinkingLead(id) {
     } catch (error) {
         console.error('Error deleting lead:', error);
         showNotification('Error deleting lead: ' + error.message, 'error');
+    }
+}
+
+// ===========================
+// ACCOUNT MANAGEMENT FUNCTIONS
+// ===========================
+
+let allAccounts = [];
+
+async function loadAccounts() {
+    try {
+        const response = await fetch(`${API_URL}/accounts.php`);
+        const data = await response.json();
+
+        if (response.ok) {
+            allAccounts = data;
+            renderAccounts();
+            updateAccountStats();
+        } else {
+            console.error('Error loading accounts:', data.error);
+            // If access denied, hide the accounts menu item
+            if (response.status === 403) {
+                const accountsMenuItem = document.getElementById('accountsMenuItem');
+                if (accountsMenuItem) {
+                    accountsMenuItem.style.display = 'none';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading accounts:', error);
+    }
+}
+
+function renderAccounts() {
+    const tbody = document.getElementById('accountsTableBody');
+
+    if (allAccounts.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                    </svg>
+                    <p>No accounts found</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = allAccounts.map(account => {
+        const lastLogin = account.last_login ? new Date(account.last_login).toLocaleString() : 'Never';
+        const statusColor = account.is_active ? '#10b981' : '#ef4444';
+        const billingColor = account.billing_status === 'active' ? '#10b981' :
+                           account.billing_status === 'overdue' ? '#f59e0b' : '#ef4444';
+
+        return `
+            <tr>
+                <td><strong>${account.username}</strong></td>
+                <td>${account.email}</td>
+                <td>
+                    <span class="badge" style="background: ${account.role === 'super_admin' ? '#8b5cf6' : account.role === 'admin' ? '#3b82f6' : '#6b7280'};">
+                        ${account.role.replace('_', ' ')}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge" style="background: ${account.account_status === 'max' ? '#10b981' : account.account_status === 'pro' ? '#3b82f6' : '#6b7280'};">
+                        ${account.account_status}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge" style="background: ${billingColor};">
+                        ${account.billing_status}
+                    </span>
+                </td>
+                <td style="font-size: 0.875rem; color: var(--text-muted);">${lastLogin}</td>
+                <td>
+                    <button class="btn-icon" onclick="editAccount(${account.id})" title="Edit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button class="btn-icon" onclick="deleteAccount(${account.id})" title="Delete" style="color: #ef4444;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function updateAccountStats() {
+    const totalAccounts = allAccounts.length;
+    const activeAccounts = allAccounts.filter(a => a.is_active === 1 || a.is_active === true).length;
+    const superAdmins = allAccounts.filter(a => a.role === 'super_admin').length;
+
+    document.getElementById('totalAccounts').textContent = totalAccounts;
+    document.getElementById('activeAccounts').textContent = activeAccounts;
+    document.getElementById('superAdmins').textContent = superAdmins;
+}
+
+function openAccountModal(accountId = null) {
+    const modal = document.getElementById('accountModal');
+    const title = document.getElementById('accountModalTitle');
+    const form = document.getElementById('accountForm');
+    const passwordField = document.getElementById('accountPassword');
+
+    form.reset();
+    document.getElementById('accountId').value = '';
+
+    if (accountId) {
+        title.textContent = 'Edit Account';
+        const account = allAccounts.find(a => a.id == accountId);
+        if (account) {
+            document.getElementById('accountId').value = account.id;
+            document.getElementById('accountUsername').value = account.username;
+            document.getElementById('accountEmail').value = account.email;
+            document.getElementById('accountFirstName').value = account.first_name || '';
+            document.getElementById('accountLastName').value = account.last_name || '';
+            document.getElementById('accountRole').value = account.role;
+            document.getElementById('accountStatus').value = account.account_status;
+            document.getElementById('billingStatus').value = account.billing_status;
+            document.getElementById('accountIsActive').checked = account.is_active === 1 || account.is_active === true;
+            passwordField.required = false;
+        }
+    } else {
+        title.textContent = 'Add New Account';
+        document.getElementById('accountIsActive').checked = true;
+        passwordField.required = true;
+    }
+
+    modal.style.display = 'block';
+}
+
+function editAccount(id) {
+    openAccountModal(id);
+}
+
+function closeAccountModal() {
+    document.getElementById('accountModal').style.display = 'none';
+    document.getElementById('accountForm').reset();
+}
+
+async function saveAccount(event) {
+    event.preventDefault();
+
+    const accountId = document.getElementById('accountId').value;
+    const isEdit = accountId !== '';
+
+    const accountData = {
+        username: document.getElementById('accountUsername').value,
+        email: document.getElementById('accountEmail').value,
+        role: document.getElementById('accountRole').value,
+        account_status: document.getElementById('accountStatus').value,
+        billing_status: document.getElementById('billingStatus').value,
+        first_name: document.getElementById('accountFirstName').value || null,
+        last_name: document.getElementById('accountLastName').value || null,
+        is_active: document.getElementById('accountIsActive').checked ? 1 : 0
+    };
+
+    const password = document.getElementById('accountPassword').value;
+    if (password) {
+        accountData.password = password;
+    }
+
+    if (isEdit) {
+        accountData.id = accountId;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/accounts.php`, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(accountData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            closeAccountModal();
+            await loadAccounts();
+            showNotification(isEdit ? 'Account updated successfully!' : 'Account created successfully!', 'success');
+        } else {
+            showNotification('Error: ' + (result.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving account:', error);
+        showNotification('Error saving account: ' + error.message, 'error');
+    }
+}
+
+async function deleteAccount(id) {
+    if (!confirm('Are you sure you want to delete this account? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/accounts.php?id=${id}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            await loadAccounts();
+            showNotification('Account deleted successfully!', 'success');
+        } else {
+            showNotification('Error: ' + (result.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        showNotification('Error deleting account: ' + error.message, 'error');
+    }
+}
+
+// Check if user is super admin and show accounts menu
+function checkSuperAdminAccess() {
+    const userRole = localStorage.getItem('userRole');
+    const accountsMenuItem = document.getElementById('accountsMenuItem');
+
+    console.log('Checking super admin access:', { userRole, accountsMenuItem: !!accountsMenuItem });
+
+    if (userRole === 'super_admin') {
+        if (accountsMenuItem) {
+            accountsMenuItem.style.display = 'flex';
+            console.log('Account Management menu shown');
+        }
+    } else {
+        if (accountsMenuItem) {
+            accountsMenuItem.style.display = 'none';
+            console.log('Account Management menu hidden');
+        }
+    }
+}
+
+// Get current user role
+function getCurrentUserRole() {
+    return localStorage.getItem('userRole') || 'user';
+}
+
+// Check if current user is super admin
+function isSuperAdmin() {
+    return getCurrentUserRole() === 'super_admin';
+}
+
+// Display logged in user info in sidebar
+function displayLoggedInUser() {
+    const userRole = localStorage.getItem('userRole') || 'user';
+    const userEmail = localStorage.getItem('userEmail') || '';
+
+    console.log('User info from localStorage:', { userRole, userEmail });
+
+    const loggedInUserEl = document.getElementById('loggedInUser');
+    if (loggedInUserEl) {
+        const roleLabel = userRole.replace('_', ' ');
+        loggedInUserEl.innerHTML = `
+            <div style="padding: 1rem; border-top: 1px solid var(--border-light); margin-top: auto;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                        ${userEmail ? userEmail.charAt(0).toUpperCase() : 'A'}
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 600; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${userEmail || 'Admin'}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: capitalize;">
+                            ${roleLabel}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }

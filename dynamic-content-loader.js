@@ -356,11 +356,11 @@ function getIconPath(iconName) {
 
 // Populate Footer
 function populateFooter(settings) {
-    const companyName = settings.company?.name || 'BusinessLoansProfile';
-    const taglineText = settings.footer?.tagline || 'Empowering businesses with fast, flexible financing solutions.';
-    const copyrightText = settings.footer?.copyright_text || '© 2024 BusinessLoansProfile. All rights reserved.';
-    const companyEmail = settings.company?.email || 'info@businessloans.com';
-    const companyPhone = settings.company?.phone || '1-800-BUSINESS';
+    const companyName = settings.company?.name?.value || 'BusinessLoansProfile';
+    const taglineText = settings.footer?.tagline?.value || 'Empowering businesses with fast, flexible financing solutions.';
+    const copyrightText = settings.footer?.copyright_text?.value || '© 2024 BusinessLoansProfile. All rights reserved.';
+    const companyEmail = settings.company?.email?.value || 'info@businessloans.com';
+    const companyPhone = settings.company?.phone?.value || '1-800-BUSINESS';
 
     // Update footer elements
     const footerCompanyName = document.getElementById('footer-company-name');

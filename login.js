@@ -43,8 +43,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await response.json();
 
         if (response.ok && data.success) {
-            // Store session token
+            // Store session token and user info
             localStorage.setItem('adminSession', data.token);
+            if (data.user) {
+                localStorage.setItem('userRole', data.user.role);
+                localStorage.setItem('userId', data.user.id);
+                localStorage.setItem('userEmail', data.user.email);
+            }
 
             // Show success message
             loginBtn.innerHTML = `
@@ -94,10 +99,16 @@ async function verifySession(token) {
         } else {
             // Token invalid, clear it
             localStorage.removeItem('adminSession');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
         }
     } catch (error) {
         console.error('Session verification failed:', error);
         localStorage.removeItem('adminSession');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userEmail');
     }
 }
 
