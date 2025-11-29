@@ -34,8 +34,8 @@
     <nav class="navbar">
         <div class="container">
             <div class="nav-brand">
-                <img src="images/logo.png" alt="BusinessLoansProfile Logo" width="40" height="40" style="object-fit: contain;">
-                <h2>BusinessLoansProfile</h2>
+                <img id="nav-logo" src="images/logo.png" alt="Company Logo" width="40" height="40" style="object-fit: contain;">
+                <h2 id="nav-company-name"></h2>
             </div>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <span></span>
@@ -45,7 +45,7 @@
             <div class="nav-links" id="navLinks">
                 <a href="#home">Home</a>
                 <a href="#how-it-works">How It Works</a>
-                <a href="#loan-types">Loan Types</a>
+                <a href="#about-us">About Us</a>
                 <a href="#faq">FAQ</a>
                 <a href="thinking-about-it.html" class="nav-cta-secondary">Schedule Your Funding</a>
                 <a href="#apply" class="nav-cta">Get Started →</a>
@@ -130,6 +130,67 @@
                     <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&auto=format&fit=crop" alt="Get Funded">
                     <h3>Choose & Get Funded</h3>
                     <p>Select the best offer for your business. Receive funding as fast as 24 hours.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about-us" class="about-us">
+        <div class="container">
+            <h2 class="section-title" id="about-title"></h2>
+            <p class="section-subtitle" id="about-subtitle"></p>
+
+            <div class="about-content">
+                <div class="about-text">
+                    <p id="about-description"></p>
+
+                    <div class="about-features">
+                        <div class="about-feature">
+                            <div class="about-feature-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                            </div>
+                            <div class="about-feature-text">
+                                <h4 id="about-feature1-title"></h4>
+                                <p id="about-feature1-text"></p>
+                            </div>
+                        </div>
+
+                        <div class="about-feature">
+                            <div class="about-feature-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <div class="about-feature-text">
+                                <h4 id="about-feature2-title"></h4>
+                                <p id="about-feature2-text"></p>
+                            </div>
+                        </div>
+
+                        <div class="about-feature">
+                            <div class="about-feature-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </div>
+                            <div class="about-feature-text">
+                                <h4 id="about-feature3-title"></h4>
+                                <p id="about-feature3-text"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-image">
+                    <img id="about-image" src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop" alt="Business Team">
                 </div>
             </div>
         </div>
@@ -313,7 +374,24 @@
 
                         <div class="form-group">
                             <label>Desired Loan Amount</label>
-                            <input type="text" name="loan_amount" placeholder="e.g., $50,000">
+                            <input type="text" name="loan_amount" id="loanAmountInput" placeholder="e.g., 50,000">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Upload your 3-4 recent business bank statements (PDF only)</label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <input type="file" name="documents" id="documentUpload" multiple accept=".pdf,application/pdf" style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('documentUpload').click()">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    <p>Click to upload or drag and drop</p>
+                                    <span>PDF files only (max 10MB each)</span>
+                                </div>
+                                <div class="selected-files" id="selectedFiles"></div>
+                            </div>
                         </div>
 
                         <button type="submit" class="cta-button">Submit Application</button>
@@ -335,8 +413,8 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3 id="footer-company-name">💼 BusinessLoansProfile</h3>
-                    <p id="footer-tagline">Empowering businesses with fast, flexible financing solutions.</p>
+                    <h3 id="footer-company-name"></h3>
+                    <p id="footer-tagline"></p>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
@@ -347,12 +425,12 @@
                 </div>
                 <div class="footer-section">
                     <h4>Contact</h4>
-                    <p>Email: <span id="footer-email">info@businessloans.com</span></p>
-                    <p>Phone: <span id="footer-phone">1-800-BUSINESS</span></p>
+                    <p>Email: <span id="footer-email"></span></p>
+                    <p>Phone: <span id="footer-phone"></span></p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p id="footer-copyright">&copy; 2024 BusinessLoansProfile. All rights reserved.</p>
+                <p id="footer-copyright"></p>
             </div>
         </div>
     </footer>

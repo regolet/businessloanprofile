@@ -4,6 +4,30 @@
  */
 
 const API_BASE = 'api';
+let siteCurrencySymbol = '$'; // Default currency symbol
+
+// Format currency with commas and symbol
+function formatCurrencyPublic(amount) {
+    if (!amount) return '';
+
+    // Remove any existing currency symbols and non-numeric characters except decimal and comma
+    let numStr = amount.toString().replace(/[^0-9.,]/g, '');
+
+    // Replace commas with nothing for parsing
+    numStr = numStr.replace(/,/g, '');
+
+    // Parse the number
+    const num = parseFloat(numStr);
+    if (isNaN(num)) return amount; // Return original if not a valid number
+
+    // Format with commas
+    const formatted = num.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+
+    return siteCurrencySymbol + formatted;
+}
 
 // Load all dynamic content on page load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -25,6 +49,7 @@ async function loadAllDynamicContent() {
         if (settings) {
             populateCompanyLogo(settings);
             populateHeroSection(settings);
+            populateAboutUsSection(settings);
             populateLoanTypesSection(settings, loanTypes);
             populateHowItWorksSection(settings, howItWorksSteps);
             populateFooter(settings);
@@ -62,18 +87,37 @@ async function fetchDynamicContent(type) {
     return [];
 }
 
-// Populate Company Logo
+// Populate Company Info (Name and Logo)
 function populateCompanyLogo(settings) {
     const company = settings.company;
-    if (!company || !company.logo_url || !company.logo_url.value) return;
+    if (!company) return;
 
-    const logoUrl = company.logo_url.value;
+    // Set currency symbol for the site
+    if (company.currency && company.currency.value) {
+        siteCurrencySymbol = company.currency.value;
+    }
 
-    // Update all logo images on the page
-    const logoImages = document.querySelectorAll('img[alt*="Logo"], img[alt*="logo"]');
-    logoImages.forEach(img => {
-        img.src = logoUrl;
-    });
+    // Update company name in navbar
+    const navCompanyName = document.getElementById('nav-company-name');
+    if (navCompanyName && company.name && company.name.value) {
+        navCompanyName.textContent = company.name.value;
+    }
+
+    // Update logo
+    if (company.logo_url && company.logo_url.value) {
+        const logoUrl = company.logo_url.value;
+
+        // Update all logo images on the page
+        const logoImages = document.querySelectorAll('img[alt*="Logo"], img[alt*="logo"], #nav-logo');
+        logoImages.forEach(img => {
+            img.src = logoUrl;
+        });
+    }
+
+    // Update page title with company name
+    if (company.name && company.name.value) {
+        document.title = `${company.name.value} - Fast & Simple Funding Solutions`;
+    }
 }
 
 // Populate Hero Section
@@ -139,6 +183,71 @@ function populateHeroFeatures(features) {
         `;
         container.appendChild(featureDiv);
     });
+}
+
+// Populate About Us Section
+function populateAboutUsSection(settings) {
+    const aboutUs = settings.about_us;
+    const companyName = settings.company?.name?.value || 'Our Company';
+
+    // Title - use company name dynamically
+    const titleEl = document.getElementById('about-title');
+    if (titleEl) {
+        if (aboutUs?.title?.value) {
+            // Replace any hardcoded company name with dynamic one
+            titleEl.textContent = aboutUs.title.value.replace(/BusinessLoansProfile/gi, companyName);
+        } else {
+            titleEl.textContent = `About ${companyName}`;
+        }
+    }
+
+    // Subtitle
+    const subtitleEl = document.getElementById('about-subtitle');
+    if (subtitleEl && aboutUs.subtitle) {
+        subtitleEl.textContent = aboutUs.subtitle.value;
+    }
+
+    // Description
+    const descEl = document.getElementById('about-description');
+    if (descEl && aboutUs.description) {
+        descEl.textContent = aboutUs.description.value;
+    }
+
+    // Image
+    const imageEl = document.getElementById('about-image');
+    if (imageEl && aboutUs.image_url) {
+        imageEl.src = aboutUs.image_url.value;
+    }
+
+    // Feature 1
+    const feature1Title = document.getElementById('about-feature1-title');
+    const feature1Text = document.getElementById('about-feature1-text');
+    if (feature1Title && aboutUs.feature1_title) {
+        feature1Title.textContent = aboutUs.feature1_title.value;
+    }
+    if (feature1Text && aboutUs.feature1_text) {
+        feature1Text.textContent = aboutUs.feature1_text.value;
+    }
+
+    // Feature 2
+    const feature2Title = document.getElementById('about-feature2-title');
+    const feature2Text = document.getElementById('about-feature2-text');
+    if (feature2Title && aboutUs.feature2_title) {
+        feature2Title.textContent = aboutUs.feature2_title.value;
+    }
+    if (feature2Text && aboutUs.feature2_text) {
+        feature2Text.textContent = aboutUs.feature2_text.value;
+    }
+
+    // Feature 3
+    const feature3Title = document.getElementById('about-feature3-title');
+    const feature3Text = document.getElementById('about-feature3-text');
+    if (feature3Title && aboutUs.feature3_title) {
+        feature3Title.textContent = aboutUs.feature3_title.value;
+    }
+    if (feature3Text && aboutUs.feature3_text) {
+        feature3Text.textContent = aboutUs.feature3_text.value;
+    }
 }
 
 // Populate Loan Types Section
@@ -356,11 +465,21 @@ function getIconPath(iconName) {
 
 // Populate Footer
 function populateFooter(settings) {
-    const companyName = settings.company?.name?.value || 'BusinessLoansProfile';
+    const companyName = settings.company?.name?.value || 'Our Company';
     const taglineText = settings.footer?.tagline?.value || 'Empowering businesses with fast, flexible financing solutions.';
-    const copyrightText = settings.footer?.copyright_text?.value || '© 2024 BusinessLoansProfile. All rights reserved.';
-    const companyEmail = settings.company?.email?.value || 'info@businessloans.com';
-    const companyPhone = settings.company?.phone?.value || '1-800-BUSINESS';
+    const companyEmail = settings.company?.email?.value || '';
+    const companyPhone = settings.company?.phone?.value || '';
+
+    // Generate copyright text dynamically with current year and company name
+    const currentYear = new Date().getFullYear();
+    let copyrightText = settings.footer?.copyright_text?.value || '';
+    if (copyrightText) {
+        // Replace any hardcoded company name and year
+        copyrightText = copyrightText.replace(/BusinessLoansProfile/gi, companyName);
+        copyrightText = copyrightText.replace(/\d{4}/, currentYear);
+    } else {
+        copyrightText = `© ${currentYear} ${companyName}. All rights reserved.`;
+    }
 
     // Update footer elements
     const footerCompanyName = document.getElementById('footer-company-name');

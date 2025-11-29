@@ -9,6 +9,34 @@ let rowsPerPage = 20;
 let sortColumn = 'created_at';
 let sortDirection = 'desc';
 let searchTerm = '';
+let currencySymbol = '$'; // Default currency symbol
+
+// ============================================
+// CURRENCY FORMATTING
+// ============================================
+
+// Format a number with commas and currency symbol
+function formatCurrency(amount) {
+    if (!amount) return '-';
+
+    // Remove any existing currency symbols and non-numeric characters except decimal and comma
+    let numStr = amount.toString().replace(/[^0-9.,]/g, '');
+
+    // Replace commas with nothing for parsing
+    numStr = numStr.replace(/,/g, '');
+
+    // Parse the number
+    const num = parseFloat(numStr);
+    if (isNaN(num)) return amount; // Return original if not a valid number
+
+    // Format with commas
+    const formatted = num.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+
+    return currencySymbol + formatted;
+}
 
 // ============================================
 // NOTIFICATION SYSTEM
@@ -104,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Initialize admin panel
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Check authentication first
     const token = checkAuth();
     if (!token) return;
@@ -115,9 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display logged in user info
     displayLoggedInUser();
 
+    // Load settings first to get currency symbol before displaying leads
+    await loadSettings();
+
     loadLeads();
     loadQuestions();
-    loadSettings();
     loadDynamicContent();
     setupQuestionForm();
     setupSettingsForm();
@@ -376,15 +406,30 @@ function displayLeadsTable() {
             <td>${escapeHtml(lead.email) || '-'}</td>
             <td>${escapeHtml(lead.phone) || '-'}</td>
             <td>${escapeHtml(lead.business_name) || '-'}</td>
-            <td>${escapeHtml(lead.loan_amount) || '-'}</td>
+            <td>${formatCurrency(lead.loan_amount)}</td>
+            <td>${lead.document_count > 0 ? `<span class="doc-badge" title="${lead.document_count} document(s)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg> ${lead.document_count}</span>` : '-'}</td>
             <td>${formatDate(lead.created_at)}</td>
             <td>
-                <button class="btn-icon" onclick="viewLead(${lead.id})" title="View Details">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </button>
+                <div class="btn-group">
+                    <button class="btn-icon" onclick="viewLead(${lead.id})" title="View Details">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                    <button class="btn-icon" onclick="editLead(${lead.id})" title="Edit Lead">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button class="btn-icon btn-danger" onclick="deleteLead(${lead.id}, '${escapeHtml(lead.name || 'this lead').replace(/'/g, "\\'")}')\" title="Delete Lead">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
             </td>
         </tr>
     `).join('');
@@ -615,7 +660,7 @@ async function viewLead(leadId) {
                 </div>
                 <div class="info-row">
                     <div class="info-label">Loan Amount:</div>
-                    <div class="info-value">${escapeHtml(lead.loan_amount) || '-'}</div>
+                    <div class="info-value">${formatCurrency(lead.loan_amount)}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Submitted:</div>
@@ -635,6 +680,42 @@ async function viewLead(leadId) {
                 '<p>No answers recorded</p>'
             }
             </div>
+
+            <div class="documents-section">
+                <h3>Uploaded Documents (Bank Statements)</h3>
+                ${lead.documents && lead.documents.length > 0 ?
+                `<div class="documents-list">
+                    ${lead.documents.map(doc => `
+                        <div class="document-item">
+                            <div class="doc-info">
+                                <svg class="doc-icon" width="20" height="20" viewBox="0 0 24 24" fill="#dc2626">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8" fill="none" stroke="white" stroke-width="2"/>
+                                </svg>
+                                <span class="doc-name">${escapeHtml(doc.original_filename)}</span>
+                                <span class="doc-size">(${formatFileSize(doc.file_size)})</span>
+                            </div>
+                            <div class="doc-actions">
+                                <button class="btn-preview" onclick="previewDocument(${doc.id}, '${escapeHtml(doc.original_filename).replace(/'/g, "\\'")}')\" title="Preview">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                                <a href="${API_URL}/upload-documents.php?download=${doc.id}" class="btn-download" title="Download">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>` :
+                '<p>No documents uploaded</p>'
+            }
+            </div>
         `;
 
         modal.style.display = 'block';
@@ -647,6 +728,117 @@ async function viewLead(leadId) {
 // Close lead modal
 function closeLeadModal() {
     document.getElementById('leadModal').style.display = 'none';
+}
+
+// Edit lead - open edit modal
+async function editLead(leadId) {
+    try {
+        const response = await fetch(`${API_URL}/admin-leads.php?id=${leadId}`, {
+            headers: getAuthHeaders()
+        });
+        const lead = await response.json();
+
+        const modal = document.getElementById('editLeadModal');
+        document.getElementById('editLeadId').value = lead.id;
+        document.getElementById('editLeadName').value = lead.name || '';
+        document.getElementById('editLeadEmail').value = lead.email || '';
+        document.getElementById('editLeadPhone').value = lead.phone || '';
+        document.getElementById('editLeadBusiness').value = lead.business_name || '';
+        document.getElementById('editLeadAmount').value = lead.loan_amount || '';
+
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Error loading lead for edit:', error);
+        showNotification('Error loading lead details', 'error');
+    }
+}
+
+// Save lead edits
+async function saveLeadEdit() {
+    const leadId = document.getElementById('editLeadId').value;
+    const leadData = {
+        id: parseInt(leadId),
+        name: document.getElementById('editLeadName').value,
+        email: document.getElementById('editLeadEmail').value,
+        phone: document.getElementById('editLeadPhone').value,
+        business_name: document.getElementById('editLeadBusiness').value,
+        loan_amount: document.getElementById('editLeadAmount').value
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/admin-leads-manage.php`, {
+            method: 'PUT',
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(leadData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Lead updated successfully', 'success');
+            closeEditLeadModal();
+            loadLeads(); // Refresh the leads list
+        } else {
+            showNotification(result.error || 'Failed to update lead', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating lead:', error);
+        showNotification('Error updating lead', 'error');
+    }
+}
+
+// Close edit lead modal
+function closeEditLeadModal() {
+    document.getElementById('editLeadModal').style.display = 'none';
+}
+
+// Delete lead
+async function deleteLead(leadId, leadName) {
+    if (!confirm(`Are you sure you want to delete "${leadName}"?\n\nThis will also delete all associated answers and documents. This action cannot be undone.`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/admin-leads-manage.php?id=${leadId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Lead deleted successfully', 'success');
+            loadLeads(); // Refresh the leads list
+        } else {
+            showNotification(result.error || 'Failed to delete lead', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting lead:', error);
+        showNotification('Error deleting lead', 'error');
+    }
+}
+
+// Preview document in modal
+function previewDocument(docId, filename) {
+    const previewUrl = `${API_URL}/upload-documents.php?preview=${docId}`;
+    const modal = document.getElementById('documentPreviewModal');
+    const iframe = document.getElementById('documentPreviewFrame');
+    const title = document.getElementById('documentPreviewTitle');
+
+    title.textContent = filename;
+    iframe.src = previewUrl;
+    modal.style.display = 'block';
+}
+
+// Close document preview modal
+function closeDocumentPreview() {
+    const modal = document.getElementById('documentPreviewModal');
+    const iframe = document.getElementById('documentPreviewFrame');
+    iframe.src = '';
+    modal.style.display = 'none';
 }
 
 // Load questions
@@ -839,6 +1031,14 @@ function formatDate(dateString) {
     return date.toLocaleString();
 }
 
+// Format file size
+function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
 // Close modals when clicking outside
 window.onclick = function (event) {
     const leadModal = document.getElementById('leadModal');
@@ -903,6 +1103,11 @@ async function loadSettings() {
 
         siteSettings = await response.json();
 
+        // Set currency symbol for formatting
+        if (siteSettings.company?.currency?.value) {
+            currencySymbol = siteSettings.company.currency.value;
+        }
+
         displaySettings();
     } catch (error) {
         console.error('Error loading settings:', error);
@@ -943,6 +1148,15 @@ function displaySettings() {
         if (companyEmail) companyEmail.value = siteSettings.company.email?.value || '';
         if (companyPhone) companyPhone.value = siteSettings.company.phone?.value || '';
         if (companyAddress) companyAddress.value = siteSettings.company.address?.value || '';
+
+        const companyCurrency = document.getElementById('company_currency');
+        if (companyCurrency) companyCurrency.value = siteSettings.company.currency?.value || '$';
+
+        // Update edit lead modal placeholder with currency
+        const editLeadAmount = document.getElementById('editLeadAmount');
+        if (editLeadAmount) {
+            editLeadAmount.placeholder = `e.g., ${currencySymbol}50,000`;
+        }
     }
 
     // Hero section
@@ -969,6 +1183,31 @@ function displaySettings() {
         if (feature1) feature1.value = siteSettings.hero_features.feature1_text?.value || '';
         if (feature2) feature2.value = siteSettings.hero_features.feature2_text?.value || '';
         if (feature3) feature3.value = siteSettings.hero_features.feature3_text?.value || '';
+    }
+
+    // About Us
+    if (siteSettings.about_us) {
+        const aboutTitle = document.getElementById('about_us_title');
+        const aboutSubtitle = document.getElementById('about_us_subtitle');
+        const aboutDescription = document.getElementById('about_us_description');
+        const aboutImage = document.getElementById('about_us_image_url');
+        const aboutFeature1Title = document.getElementById('about_us_feature1_title');
+        const aboutFeature1Text = document.getElementById('about_us_feature1_text');
+        const aboutFeature2Title = document.getElementById('about_us_feature2_title');
+        const aboutFeature2Text = document.getElementById('about_us_feature2_text');
+        const aboutFeature3Title = document.getElementById('about_us_feature3_title');
+        const aboutFeature3Text = document.getElementById('about_us_feature3_text');
+
+        if (aboutTitle) aboutTitle.value = siteSettings.about_us.title?.value || '';
+        if (aboutSubtitle) aboutSubtitle.value = siteSettings.about_us.subtitle?.value || '';
+        if (aboutDescription) aboutDescription.value = siteSettings.about_us.description?.value || '';
+        if (aboutImage) aboutImage.value = siteSettings.about_us.image_url?.value || '';
+        if (aboutFeature1Title) aboutFeature1Title.value = siteSettings.about_us.feature1_title?.value || '';
+        if (aboutFeature1Text) aboutFeature1Text.value = siteSettings.about_us.feature1_text?.value || '';
+        if (aboutFeature2Title) aboutFeature2Title.value = siteSettings.about_us.feature2_title?.value || '';
+        if (aboutFeature2Text) aboutFeature2Text.value = siteSettings.about_us.feature2_text?.value || '';
+        if (aboutFeature3Title) aboutFeature3Title.value = siteSettings.about_us.feature3_title?.value || '';
+        if (aboutFeature3Text) aboutFeature3Text.value = siteSettings.about_us.feature3_text?.value || '';
     }
 
     // Loan types
@@ -1032,6 +1271,7 @@ function setupSettingsForm() {
             company: {},
             hero: {},
             hero_features: {},
+            about_us: {},
             loan_types: {},
             how_it_works: {},
             faq: {},
@@ -1054,6 +1294,8 @@ function setupSettingsForm() {
 
             if (category === 'hero' && parts[1] === 'features') {
                 settings.hero_features[parts.slice(2).join('_')] = value;
+            } else if (category === 'about' && parts[1] === 'us') {
+                settings.about_us[parts.slice(2).join('_')] = value;
             } else if (category === 'loan' && parts[1] === 'types') {
                 settings.loan_types[parts.slice(2).join('_')] = value;
             } else if (category === 'how') {
@@ -1210,6 +1452,7 @@ function switchSettingsTab(tabName) {
         'company': 'companyTab',
         'hero': 'heroTab',
         'features': 'featuresTab',
+        'aboutus': 'aboutusTab',
         'loantypes': 'loantypesTab',
         'howitworks': 'howitworksTab',
         'faq': 'faqTab',

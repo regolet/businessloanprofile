@@ -2,7 +2,7 @@
 /**
  * Admin Leads Endpoint
  * GET /api/admin-leads.php - Get all leads
- * GET /api/admin-leads.php?id=123 - Get specific lead with answers
+ * GET /api/admin-leads.php?id=123 - Get specific lead with answers and documents
  */
 
 require_once 'config.php';
@@ -39,6 +39,21 @@ try {
         $answerStmt->execute([$leadId]);
         $answers = $answerStmt->fetchAll();
 
+        // Get documents
+        $documents = [];
+        try {
+            $docStmt = $conn->prepare("
+                SELECT id, original_filename, file_size, mime_type, uploaded_at
+                FROM lead_documents
+                WHERE lead_id = ?
+                ORDER BY uploaded_at DESC
+            ");
+            $docStmt->execute([$leadId]);
+            $documents = $docStmt->fetchAll();
+        } catch (PDOException $e) {
+            // Table might not exist yet, ignore
+        }
+
         sendJson([
             'id' => (int)$lead['id'],
             'name' => $lead['name'],
@@ -47,12 +62,18 @@ try {
             'business_name' => $lead['business_name'],
             'loan_amount' => $lead['loan_amount'],
             'created_at' => $lead['created_at'],
-            'answers' => $answers
+            'answers' => $answers,
+            'documents' => $documents
         ]);
 
     } else {
-        // Get all leads
-        $stmt = $conn->query("SELECT * FROM leads ORDER BY created_at DESC");
+        // Get all leads with document count
+        $stmt = $conn->query("
+            SELECT l.*,
+                   (SELECT COUNT(*) FROM lead_documents WHERE lead_id = l.id) as document_count
+            FROM leads l
+            ORDER BY l.created_at DESC
+        ");
         $leads = $stmt->fetchAll();
 
         sendJson($leads);

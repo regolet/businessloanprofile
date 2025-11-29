@@ -261,6 +261,19 @@ try {
                 INDEX idx_email (email),
                 INDEX idx_role (role)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ",
+        'lead_documents' => "
+            CREATE TABLE IF NOT EXISTS lead_documents (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                lead_id INT NOT NULL,
+                original_filename VARCHAR(255) NOT NULL,
+                stored_filename VARCHAR(255) NOT NULL,
+                file_size INT NOT NULL,
+                mime_type VARCHAR(100) NOT NULL,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+                INDEX idx_lead_id (lead_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         "
     ];
 
@@ -313,6 +326,16 @@ try {
         $stats['columns_added']++;
     } else {
         echo "<div class='item exists'><span class='icon'>ℹ️</span>Column <code>image_url</code> already exists in <code>how_it_works_steps</code></div>";
+    }
+
+    // Check and add currency setting if it doesn't exist
+    $currencyExists = $conn->query("SELECT id FROM site_settings WHERE category = 'company' AND setting_key = 'currency'")->fetch();
+    if (!$currencyExists) {
+        $conn->exec("INSERT INTO site_settings (category, setting_key, setting_value, setting_type) VALUES ('company', 'currency', '$', 'text')");
+        echo "<div class='item created'><span class='icon'>✓</span>Added <code>currency</code> setting to <code>site_settings</code></div>";
+        $stats['data_inserted']++;
+    } else {
+        echo "<div class='item exists'><span class='icon'>ℹ️</span>Setting <code>currency</code> already exists in <code>site_settings</code></div>";
     }
 
     echo "</div>";
@@ -424,6 +447,7 @@ try {
             ['company', 'email', 'info@businessloans.com', 'email'],
             ['company', 'phone', '1-800-BUSINESS', 'text'],
             ['company', 'address', '', 'textarea'],
+            ['company', 'currency', '$', 'text'],
 
             // Hero Section
             ['hero', 'title', 'Funding to Fuel Your Business', 'text'],
@@ -444,6 +468,18 @@ try {
             // How It Works
             ['how_it_works', 'section_title', 'Compare Multiple Offers in Minutes', 'text'],
             ['how_it_works', 'section_subtitle', 'Our proprietary technology matches you with handpicked lenders from our network', 'text'],
+
+            // About Us
+            ['about_us', 'title', 'About BusinessLoansProfile', 'text'],
+            ['about_us', 'subtitle', 'Your trusted partner in business financing', 'text'],
+            ['about_us', 'description', 'We are dedicated to helping businesses of all sizes access the funding they need to grow and succeed. With years of experience in the financial industry, our team understands the challenges business owners face when seeking capital.', 'textarea'],
+            ['about_us', 'image_url', 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&auto=format&fit=crop', 'text'],
+            ['about_us', 'feature1_title', 'Trusted Network', 'text'],
+            ['about_us', 'feature1_text', 'Access to 50+ vetted lenders offering competitive rates and terms', 'text'],
+            ['about_us', 'feature2_title', 'Fast Process', 'text'],
+            ['about_us', 'feature2_text', 'Get matched with lenders in minutes, not days or weeks', 'text'],
+            ['about_us', 'feature3_title', 'Expert Support', 'text'],
+            ['about_us', 'feature3_text', 'Our funding specialists guide you every step of the way', 'text'],
 
             // FAQ Items (default 4 FAQs)
             ['faq', 'faq1_question', 'How long does the application take?', 'text'],

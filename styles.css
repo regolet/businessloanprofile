@@ -291,6 +291,34 @@ h6 {
     box-shadow: 0 12px 30px rgba(37, 99, 235, 0.5);
 }
 
+.cta-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cta-button.loading {
+    pointer-events: none;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .hero-note {
     margin-top: 16px;
     font-size: 0.875rem;
@@ -328,7 +356,89 @@ h6 {
     margin: 0 auto 60px;
 }
 
-/* Loan Types */
+/* About Us Section */
+.about-us {
+    padding: 100px 0;
+    position: relative;
+    z-index: 10;
+    background: var(--bg-body);
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.about-text {
+    order: 1;
+}
+
+.about-text > p {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+}
+
+.about-features {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.about-feature {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.about-feature-icon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 12px;
+    color: var(--primary-color);
+    transition: var(--transition);
+}
+
+.about-feature:hover .about-feature-icon {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.about-feature-text h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 8px 0;
+}
+
+.about-feature-text p {
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.about-image {
+    order: 2;
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    object-fit: cover;
+}
+
+/* Loan Types (Legacy - kept for backward compatibility) */
 .loan-types {
     padding: 100px 0;
     position: relative;
@@ -660,6 +770,99 @@ h6 {
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
+/* File Upload Area */
+.file-upload-area {
+    border: 2px dashed var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    background: var(--bg-body);
+    transition: var(--transition);
+}
+
+.file-upload-area:hover,
+.file-upload-area.drag-over {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.upload-placeholder {
+    text-align: center;
+    cursor: pointer;
+    padding: 20px;
+}
+
+.upload-placeholder svg {
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.upload-placeholder p {
+    margin: 0 0 5px 0;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.upload-placeholder span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.selected-files {
+    margin-top: 15px;
+}
+
+.selected-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: white;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border: 1px solid var(--border-light);
+}
+
+.selected-file .file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.selected-file .file-icon {
+    color: #dc2626;
+    flex-shrink: 0;
+}
+
+.selected-file .file-name {
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.selected-file .file-size {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.selected-file .remove-file {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+    transition: var(--transition);
+}
+
+.selected-file .remove-file:hover {
+    color: #dc2626;
+}
+
 /* FAQ */
 .faq-section {
     padding: 100px 0;
@@ -971,6 +1174,48 @@ h6 {
     .footer-content {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+
+    /* About Us Mobile */
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .about-text {
+        order: 2;
+    }
+
+    .about-image {
+        order: 1;
+    }
+
+    .about-text > p {
+        font-size: 1rem;
+        margin-bottom: 32px;
+    }
+
+    .about-feature {
+        gap: 16px;
+    }
+
+    .about-feature-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+    }
+
+    .about-feature-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .about-feature-text h4 {
+        font-size: 1rem;
+    }
+
+    .about-feature-text p {
+        font-size: 0.875rem;
     }
 
     .loan-card {

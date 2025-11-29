@@ -253,6 +253,7 @@
                                         <polyline points="6 9 12 15 18 9" />
                                     </svg>
                                 </th>
+                                <th>Docs</th>
                                 <th class="sortable" onclick="sortTable('created_at')">
                                     Date
                                     <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -265,7 +266,7 @@
                         </thead>
                         <tbody id="leadsTableBody">
                             <tr>
-                                <td colspan="8" class="loading">Loading leads...</td>
+                                <td colspan="9" class="loading">Loading leads...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -354,6 +355,7 @@
                     <button class="settings-tab active" onclick="switchSettingsTab('company')">Company Info</button>
                     <button class="settings-tab" onclick="switchSettingsTab('hero')">Hero Section</button>
                     <button class="settings-tab" onclick="switchSettingsTab('features')">Hero Features</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('aboutus')">About Us</button>
                     <button class="settings-tab" onclick="switchSettingsTab('loantypes')">Loan Types</button>
                     <button class="settings-tab" onclick="switchSettingsTab('howitworks')">How It Works</button>
                     <button class="settings-tab" onclick="switchSettingsTab('faq')">FAQ</button>
@@ -422,6 +424,24 @@
                                 <label>Address (Optional)</label>
                                 <textarea id="company_address" name="company_address" rows="2"></textarea>
                             </div>
+                            <div class="form-group">
+                                <label>Currency Symbol</label>
+                                <select id="company_currency" name="company_currency">
+                                    <option value="$">$ - US Dollar (USD)</option>
+                                    <option value="€">€ - Euro (EUR)</option>
+                                    <option value="£">£ - British Pound (GBP)</option>
+                                    <option value="¥">¥ - Japanese Yen (JPY)</option>
+                                    <option value="₹">₹ - Indian Rupee (INR)</option>
+                                    <option value="A$">A$ - Australian Dollar (AUD)</option>
+                                    <option value="C$">C$ - Canadian Dollar (CAD)</option>
+                                    <option value="₱">₱ - Philippine Peso (PHP)</option>
+                                    <option value="₩">₩ - Korean Won (KRW)</option>
+                                    <option value="R$">R$ - Brazilian Real (BRL)</option>
+                                </select>
+                                <small style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+                                    Currency symbol used to display loan amounts throughout the site
+                                </small>
+                            </div>
                         </div>
                     </div>
 
@@ -474,6 +494,73 @@
                             </div>
                             <div id="heroFeaturesList">
                                 <!-- Dynamic features will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About Us Tab -->
+                    <div id="aboutusTab" class="settings-tab-content">
+                        <div class="settings-category">
+                            <h2>About Us Section</h2>
+
+                            <div class="form-group">
+                                <label>Section Title</label>
+                                <input type="text" id="about_us_title" name="about_us_title">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Section Subtitle</label>
+                                <input type="text" id="about_us_subtitle" name="about_us_subtitle">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="about_us_description" name="about_us_description" rows="4"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Image URL</label>
+                                <input type="text" id="about_us_image_url" name="about_us_image_url" placeholder="https://...">
+                            </div>
+                        </div>
+
+                        <div class="settings-category">
+                            <h2>Features</h2>
+
+                            <div style="background: var(--bg-body); padding: 1.5rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-main);">Feature 1</h4>
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input type="text" id="about_us_feature1_title" name="about_us_feature1_title">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>Description</label>
+                                    <input type="text" id="about_us_feature1_text" name="about_us_feature1_text">
+                                </div>
+                            </div>
+
+                            <div style="background: var(--bg-body); padding: 1.5rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-main);">Feature 2</h4>
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input type="text" id="about_us_feature2_title" name="about_us_feature2_title">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>Description</label>
+                                    <input type="text" id="about_us_feature2_text" name="about_us_feature2_text">
+                                </div>
+                            </div>
+
+                            <div style="background: var(--bg-body); padding: 1.5rem; border-radius: var(--radius-sm);">
+                                <h4 style="margin: 0 0 1rem 0; color: var(--text-main);">Feature 3</h4>
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input type="text" id="about_us_feature3_title" name="about_us_feature3_title">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>Description</label>
+                                    <input type="text" id="about_us_feature3_text" name="about_us_feature3_text">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -686,6 +773,56 @@
             </div>
             <div class="modal-body" id="leadDetailBody">
                 <!-- Lead details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Lead Modal -->
+    <div id="editLeadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Lead</h2>
+                <span class="close" onclick="closeEditLeadModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editLeadId">
+                <div class="form-group">
+                    <label for="editLeadName">Name</label>
+                    <input type="text" id="editLeadName" placeholder="Full Name">
+                </div>
+                <div class="form-group">
+                    <label for="editLeadEmail">Email</label>
+                    <input type="email" id="editLeadEmail" placeholder="Email Address">
+                </div>
+                <div class="form-group">
+                    <label for="editLeadPhone">Phone</label>
+                    <input type="tel" id="editLeadPhone" placeholder="Phone Number">
+                </div>
+                <div class="form-group">
+                    <label for="editLeadBusiness">Business Name</label>
+                    <input type="text" id="editLeadBusiness" placeholder="Business Name">
+                </div>
+                <div class="form-group">
+                    <label for="editLeadAmount">Loan Amount</label>
+                    <input type="text" id="editLeadAmount" placeholder="e.g., 50,000">
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeEditLeadModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveLeadEdit()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Preview Modal -->
+    <div id="documentPreviewModal" class="modal document-preview-modal">
+        <div class="modal-content modal-content-large">
+            <div class="modal-header">
+                <h2 id="documentPreviewTitle">Document Preview</h2>
+                <span class="close" onclick="closeDocumentPreview()">&times;</span>
+            </div>
+            <div class="modal-body document-preview-body">
+                <iframe id="documentPreviewFrame" src="" frameborder="0"></iframe>
             </div>
         </div>
     </div>
